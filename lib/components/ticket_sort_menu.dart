@@ -40,7 +40,7 @@ class TicketSortMenu extends ConsumerWidget {
                   MenuController controller,
                   Widget? child,
                 ) {
-                  return TextButton(
+                  return TextButton.icon(
                     onPressed: () {
                       if (controller.isOpen) {
                         controller.close();
@@ -48,29 +48,22 @@ class TicketSortMenu extends ConsumerWidget {
                         controller.open();
                       }
                     },
-                    child: Row(
+                    icon: Icon(Icons.sort),
+                    label: Row(
                       mainAxisSize: MainAxisSize.min,
+                      spacing: 6,
                       children: [
                         Text(switch (sortMode) {
-                          TicketSortMode.client => 'Nome do Cliente',
                           TicketSortMode.service => 'Serviço',
-                          TicketSortMode.startDate => 'Data de Início',
-                          TicketSortMode.deliveryDate => 'Data de Entrega',
                           TicketSortMode.status => 'Status',
+                          TicketSortMode.client => 'Nome do Cliente',
+                          TicketSortMode.startDate => 'Data de Entrada',
+                          TicketSortMode.deliveryDate => 'Data de Entrega',
                         }),
-                        Padding(
-                          padding: EdgeInsetsGeometry.all(4),
-                          child: Container(
-                            padding: EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Icon(sortDirectionIcon),
-                          ),
-                        ),
+                        Text(switch (sortDirection) {
+                          TicketSortDirection.ascending => '(Crescente)',
+                          TicketSortDirection.descending => '(Decrescente)',
+                        }),
                       ],
                     ),
                   );

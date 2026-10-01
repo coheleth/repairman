@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:repairman/views/ticket_edit.dart';
 import 'package:repairman/views/ticket_list.dart';
 
 class TicketDashboard extends StatelessWidget {
@@ -31,6 +32,13 @@ class TicketDashboard extends StatelessWidget {
                   child: Navigator(
                     key: navigatorKey,
                     onGenerateRoute: (settings) {
+                      if (settings.name == 'open') {
+                        return MaterialPageRoute(
+                          builder: (context) =>
+                              TicketEdit(navigatorKey: navigatorKey),
+                        );
+                      }
+
                       return MaterialPageRoute(
                         builder: (context) => LayoutBuilder(
                           builder: (context, constraints) {

@@ -7,7 +7,7 @@ part 'ticket_list.g.dart';
 
 @riverpod
 class TicketList extends _$TicketList {
-  late TicketSortObject ticketSort;
+  late TicketSortObject ticketSort = TicketSortObject();
 
   @override
   List<Ticket> build() {
@@ -38,7 +38,7 @@ class TicketList extends _$TicketList {
   void create(Ticket ticket) async {
     final id = await DBController().createTicket(ticket);
     final ticketSort = ref.read(ticketSortProvider);
-    if (ticketSort.status == ticket.statusId) {
+    if (ticketSort.status == ticket.statusId || ticketSort.status == 0) {
       state = [ticket.copyWith(id: id), ...state];
     }
   }

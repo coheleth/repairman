@@ -114,7 +114,13 @@ class _PartEditorState extends State<PartEditor> {
 class PartInput extends StatefulWidget {
   final int ticketId;
   final List<Part> parts;
-  const PartInput({super.key, required this.ticketId, required this.parts});
+  final Function? onModified;
+  const PartInput({
+    super.key,
+    required this.ticketId,
+    required this.parts,
+    this.onModified,
+  });
 
   @override
   State<PartInput> createState() => _PartInputState();
@@ -135,57 +141,113 @@ class _PartInputState extends State<PartInput> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Materiais/Peças'),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: parts.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(parts[index].name),
-              subtitle: Text(
-                'R\$${priceAsString(parts[index].price, comma: true)}\nx${parts[index].quantity}',
-              ),
-              trailing: IconButton(
-                onPressed: () {
-                  Part targetPart = widget.parts.firstWhere(
-                    (part) => part == parts[index],
-                    orElse: () => Part(
-                      id: -1,
-                      ticketId: -1,
-                      name: '',
-                      quantity: 0,
-                      price: 0,
-                    ),
-                  );
-                  widget.parts[widget.parts.indexWhere(
-                    (part) => part == targetPart,
-                  )] = targetPart.copyWith(
-                    markedForRemoval: true,
-                  );
-                  setState(() {
-                    parts.removeAt(index);
-                    // parts[index] = parts[index].copyWith(
-                    //   markedForRemoval: true,
-                    // );
-                  });
-                },
-                icon: Icon(Icons.remove_outlined),
-              ),
-              onTap: () async {
-                final Part? newPart = await showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      PartEditor(ticketId: widget.ticketId, part: parts[index]),
-                );
-                if (newPart != null) {
-                  setState(() {
-                    parts[index] = newPart;
-                    widget.parts[index] = newPart;
-                  });
-                }
-              },
-            );
+        Table(
+          columnWidths: {
+            0: FlexColumnWidth(),
+            1: IntrinsicColumnWidth(),
+            2: IntrinsicColumnWidth(),
+            3: IntrinsicColumnWidth(),
+            4: IntrinsicColumnWidth(),
           },
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: List<TableRow>.generate(
+            parts.length,
+            (index) => TableRow(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Text(parts[index].name),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Text(
+                    'R\$${priceAsString(parts[index].price, comma: true)}',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Text('${parts[index].quantity}'),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    final Part? newPart = await showDialog(
+                      context: context,
+                      builder: (BuildContext context) => PartEditor(
+                        ticketId: widget.ticketId,
+                        part: parts[index],
+                      ),
+                    );
+                    if (newPart != null) {
+                      setState(() {
+                        parts[index] = newPart;
+                        widget.parts[index] = newPart;
+                      });
+                      if (widget.onModified != null) {
+                        widget.onModified!();
+                      }
+                    }
+                  },
+
+                  icon: Icon(Icons.edit_outlined),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    bool confirmed = false;
+                    await showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: Text('Remover "${parts[index].name}"?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext);
+                                confirmed = true;
+                              },
+                              child: Text('Sim'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext);
+                                return;
+                              },
+                              autofocus: true,
+                              child: Text('Não'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (confirmed) {
+                      Part targetPart = widget.parts.firstWhere(
+                        (part) => part == parts[index],
+                        orElse: () => Part(
+                          id: -1,
+                          ticketId: -1,
+                          name: '',
+                          quantity: 0,
+                          price: 0,
+                        ),
+                      );
+                      widget.parts[widget.parts.indexWhere(
+                        (part) => part == targetPart,
+                      )] = targetPart.copyWith(
+                        markedForRemoval: true,
+                      );
+                      setState(() {
+                        parts.removeAt(index);
+                      });
+
+                      if (widget.onModified != null) {
+                        widget.onModified!();
+                      }
+                    }
+                  },
+                  icon: Icon(Icons.delete_forever_outlined),
+                ),
+              ],
+            ),
+          ),
         ),
         TextButton.icon(
           onPressed: () async {
@@ -207,6 +269,10 @@ class _PartInputState extends State<PartInput> {
                 parts.add(newPart);
                 widget.parts.add(newPart);
               });
+
+              if (widget.onModified != null) {
+                widget.onModified!();
+              }
             }
           },
           icon: Icon(Icons.add),

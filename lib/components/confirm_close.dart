@@ -11,7 +11,7 @@ Future<bool> confirmClose(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (BuildContext dialogContext) {
       return AlertDialog(
-        title: Text('Cancelar alterações?'),
+        title: Text('Descartar alterações?'),
         actions: [
           TextButton(
             onPressed: () {

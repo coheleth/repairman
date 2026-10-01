@@ -27,7 +27,7 @@ class TicketList extends ConsumerWidget {
       }
       ref.read(appStateProvider.notifier).setCreating();
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
-      navigatorKey.currentState!.pushNamed('edit');
+      navigatorKey.currentState!.pushNamed('open');
     }
   }
 
@@ -55,38 +55,38 @@ class TicketList extends ConsumerWidget {
                   onPressed: () {
                     _handleNew(context, ref);
                   },
-                  style: FilledButton.styleFrom(padding: EdgeInsets.all(18)),
                   label: Text('Nova Ordem de Serviço'),
                   icon: Icon(Icons.add),
                 ),
               ),
               StatusTabList(),
               TicketSortMenu(),
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: ticketList.length,
-                itemBuilder: (context, index) => TicketCard(
-                  ticket: ticketList[index],
-                  navigatorKey: navigatorKey,
-                  sortMode: ticketSort.mode,
-                  onTap: () async {
-                    if (ref.read(appStateProvider).isEditing) {
-                      if (!await confirmClose(context, ref)) {
-                        return;
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: ticketList.length,
+                  itemBuilder: (context, index) => TicketCard(
+                    ticket: ticketList[index],
+                    navigatorKey: navigatorKey,
+                    sortMode: ticketSort.mode,
+                    onTap: () async {
+                      if (ref.read(appStateProvider).isEditing) {
+                        if (!await confirmClose(context, ref)) {
+                          return;
+                        }
                       }
-                    }
-                    ref.read(appStateProvider.notifier).setIdle();
-                    DBController().getTicketById(ticketList[index].id).then((
-                      ticket,
-                    ) {
-                      ref.read(appStateProvider.notifier).setTicket(ticket);
-                    });
-                    navigatorKey.currentState!.popUntil(
-                      (route) => route.isFirst,
-                    );
-                    navigatorKey.currentState!.pushNamed('view');
-                  },
+                      final ticket = await DBController().getTicketById(
+                        ticketList[index].id,
+                      );
+                      ref.read(appStateProvider.notifier).setEditing(ticket);
+                      navigatorKey.currentState!.popUntil(
+                        (route) => route.isFirst,
+                      );
+                      navigatorKey.currentState!.pushNamed('open');
+                    },
+                  ),
                 ),
               ),
             ],

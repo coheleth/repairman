@@ -20,11 +20,16 @@ class AppStateObject {
     this.openTicket,
   });
 
-  AppStateObject copyWithTicket(Ticket? openTicket) => AppStateObject(
+  AppStateObject copyWithTicket({
+    bool? isEditing,
+    bool? isCreating,
+    bool? modified,
+    Ticket? openTicket,
+  }) => AppStateObject(
     navigatorKey: navigatorKey,
-    isEditing: isEditing,
-    isCreating: isCreating,
-    modified: modified,
+    isEditing: isEditing ?? this.isEditing,
+    isCreating: isCreating ?? this.isCreating,
+    modified: modified ?? this.modified,
     openTicket: openTicket,
   );
 
@@ -53,7 +58,7 @@ class AppState extends _$AppState {
   }
 
   void setEditing(Ticket ticket) {
-    state = state.copyWith(
+    state = state.copyWithTicket(
       isEditing: true,
       isCreating: false,
       modified: false,
@@ -71,10 +76,11 @@ class AppState extends _$AppState {
   }
 
   void setIdle() {
-    state = state.copyWith(
+    state = state.copyWithTicket(
       isEditing: false,
       isCreating: false,
       modified: false,
+      openTicket: null,
     );
   }
 
@@ -83,6 +89,6 @@ class AppState extends _$AppState {
   }
 
   void setTicket(Ticket? ticket) {
-    state = state.copyWithTicket(ticket);
+    state = state.copyWithTicket(openTicket: ticket);
   }
 }
