@@ -134,6 +134,7 @@ Future<Uint8List> ticketToPDF(Ticket ticket) async {
       textDisplay('Condições de Entrada', ticket.repairCondition),
     if ((ticket.repairDiagnosis ?? "").isNotEmpty)
       textDisplay('Diagnóstico', ticket.repairDiagnosis),
+    if ((ticket.obs ?? "").isNotEmpty) textDisplay('Obs.', ticket.obs),
     pw.Row(
       children: [
         pw.Expanded(child: textDisplay('Serviço', ticket.service)),

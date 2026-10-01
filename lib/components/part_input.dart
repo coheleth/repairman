@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:repairman/components/text_input.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/utils.dart';
 import 'package:repairman/data/models/part.dart';
@@ -43,22 +44,15 @@ class _PartEditorState extends State<PartEditor> {
             children: [
               Padding(
                 padding: EdgeInsets.all(12),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Material/Peça',
-                    border: OutlineInputBorder(),
-                  ),
-                  initialValue: part!.name,
+                child: TextInput(
+                  labelText: 'Material/Peça',
                   onSaved: (String? value) =>
                       part = part!.copyWith(name: value ?? ""),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Campo obrigatório';
-                    }
-                    return null;
-                  },
+                  required: true,
+                  initialValue: part!.name,
                 ),
               ),
+
               Row(
                 children: [
                   Expanded(
@@ -162,105 +156,124 @@ class _PartInputState extends State<PartInput> {
             5: IntrinsicColumnWidth(),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: List<TableRow>.generate(
-            parts.length,
-            (index) => TableRow(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Checkbox(
-                    value: parts[index].ticked,
-                    onChanged: (value) {
+          children: [
+            ...List<TableRow>.generate(
+              parts.length,
+              (index) => TableRow(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Checkbox(
+                      value: parts[index].ticked,
+                      onChanged: (value) {
+                        setState(() {
+                          parts[index] = parts[index].copyWith(ticked: value);
+                          widget.parts[index] = widget.parts[index].copyWith(
+                            ticked: value,
+                          );
+                        });
+
+                        widget.onModified?.call(parts);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Text(parts[index].name),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Text(
+                      'R\$${priceAsString(parts[index].price, comma: true)}',
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Text('${parts[index].quantity}'),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      final Part? newPart = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) => PartEditor(
+                          ticketId: widget.ticketId,
+                          part: parts[index],
+                        ),
+                      );
+                      if (newPart != null) {
+                        setState(() {
+                          parts[index] = newPart;
+                          widget.parts[index] = newPart;
+                        });
+
+                        widget.onModified?.call(parts);
+                      }
+                    },
+
+                    icon: Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Part targetPart = widget.parts.firstWhere(
+                        (part) => part == parts[index],
+                        orElse: () => emptyPart(),
+                      );
+                      final int finalIndex = widget.parts.indexWhere(
+                        (part) => part == targetPart,
+                      );
+                      widget.parts[finalIndex] = targetPart.copyWith(
+                        markedForRemoval: true,
+                      );
                       setState(() {
-                        parts[index] = parts[index].copyWith(ticked: value);
-                        widget.parts[index] = widget.parts[index].copyWith(
-                          ticked: value,
-                        );
+                        parts.removeAt(index);
                       });
 
                       widget.onModified?.call(parts);
+
+                      MessagingController().sendSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Material "${targetPart.name}" Removido',
+                          ),
+                          persist: false,
+                          action: SnackBarAction(
+                            label: 'Desfazer',
+                            onPressed: () {
+                              final finalPart = targetPart.copyWith(
+                                markedForRemoval: false,
+                              );
+                              widget.parts[finalIndex] = finalPart;
+                              setState(() {
+                                parts.insert(index, finalPart);
+                              });
+
+                              widget.onModified?.call(parts);
+                            },
+                          ),
+                        ),
+                      );
                     },
+                    icon: Icon(Icons.delete_forever_outlined),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Text(parts[index].name),
-                ),
+                ],
+              ),
+            ),
+            TableRow(
+              children: [
+                Container(),
+                Padding(padding: EdgeInsets.all(6), child: const Text('Total')),
                 Padding(
                   padding: EdgeInsets.all(6),
                   child: Text(
-                    'R\$${priceAsString(parts[index].price, comma: true)}',
+                    'R\$${priceAsString(totalPartsPrice(parts)) ?? "-"}',
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Text('${parts[index].quantity}'),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final Part? newPart = await showDialog(
-                      context: context,
-                      builder: (BuildContext context) => PartEditor(
-                        ticketId: widget.ticketId,
-                        part: parts[index],
-                      ),
-                    );
-                    if (newPart != null) {
-                      setState(() {
-                        parts[index] = newPart;
-                        widget.parts[index] = newPart;
-                      });
-
-                      widget.onModified?.call(parts);
-                    }
-                  },
-
-                  icon: Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Part targetPart = widget.parts.firstWhere(
-                      (part) => part == parts[index],
-                      orElse: () => emptyPart(),
-                    );
-                    final int finalIndex = widget.parts.indexWhere(
-                      (part) => part == targetPart,
-                    );
-                    widget.parts[finalIndex] = targetPart.copyWith(
-                      markedForRemoval: true,
-                    );
-                    setState(() {
-                      parts.removeAt(index);
-                    });
-
-                    widget.onModified?.call(parts);
-
-                    MessagingController().sendSnackBar(
-                      SnackBar(
-                        content: Text('Material "${targetPart.name}" Removido'),
-                        persist: false,
-                        action: SnackBarAction(
-                          label: 'Desfazer',
-                          onPressed: () {
-                            final finalPart = targetPart.copyWith(
-                              markedForRemoval: false,
-                            );
-                            widget.parts[finalIndex] = finalPart;
-                            setState(() {
-                              parts.insert(index, finalPart);
-                            });
-
-                            widget.onModified?.call(parts);
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  icon: Icon(Icons.delete_forever_outlined),
-                ),
+                Container(),
+                Container(),
+                Container(),
               ],
             ),
-          ),
+          ],
         ),
         TextButton.icon(
           onPressed: () async {

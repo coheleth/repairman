@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:repairman/utils.dart';
+import 'package:repairman/components/text_input.dart';
 
 class DatePicker extends StatefulWidget {
   final String labelText;
@@ -42,19 +43,21 @@ class _DatePickerState extends State<DatePicker> {
       child: TextFormField(
         controller: controller,
         readOnly: true,
-        decoration: InputDecoration(
+
+        decoration: defaultDecoration(context).copyWith(
           labelText: widget.labelText,
-          border: OutlineInputBorder(),
-          suffixIcon: IconButton(
-            onPressed: () {
-              setState(() {
-                date = null;
-              });
-              widget.onChanged(null);
-              controller.text = emptyText;
-            },
-            icon: Icon(Icons.cancel_outlined),
-          ),
+          suffixIcon: date != null
+              ? IconButton(
+                  onPressed: () {
+                    setState(() {
+                      date = null;
+                    });
+                    widget.onChanged(null);
+                    controller.text = emptyText;
+                  },
+                  icon: Icon(Icons.cancel_outlined),
+                )
+              : Icon(null),
         ),
         onTap: () async {
           final newDate = await showDatePicker(

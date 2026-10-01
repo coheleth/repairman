@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+InputDecoration defaultDecoration(BuildContext context) => InputDecoration(
+  floatingLabelBehavior: FloatingLabelBehavior.always,
+  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+  filled: true,
+);
+
 class TextInput extends StatefulWidget {
   final String labelText;
   final Function onSaved;
@@ -27,10 +33,8 @@ class _TextInputState extends State<TextInput> {
     return Padding(
       padding: EdgeInsets.all(12),
       child: TextFormField(
-        decoration: InputDecoration(
-          labelText: widget.labelText,
-          border: OutlineInputBorder(),
-        ),
+        decoration: defaultDecoration(context)
+            .copyWith(labelText: widget.labelText),
         initialValue: widget.initialValue,
         minLines: widget.minLines,
         maxLines: widget.maxLines,

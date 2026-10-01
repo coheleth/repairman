@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:repairman/components/text_input.dart';
 
 class NumberInput extends StatefulWidget {
   final String labelText;
@@ -30,10 +31,8 @@ class _NumberInputState extends State<NumberInput> {
     return Padding(
       padding: EdgeInsets.all(12),
       child: TextFormField(
-        decoration: InputDecoration(
-          labelText: widget.labelText,
-          border: OutlineInputBorder(),
-        ),
+        decoration: defaultDecoration(context)
+            .copyWith(labelText: widget.labelText),
         initialValue: widget.initialValue,
         inputFormatters: [
           if (widget.regex != null)

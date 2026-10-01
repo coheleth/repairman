@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:repairman/data/state/status_list.dart';
+import 'package:repairman/components/text_input.dart';
 
 class StatusDropdown extends ConsumerWidget {
   final String labelText;
@@ -29,11 +30,8 @@ class StatusDropdown extends ConsumerWidget {
           padding: EdgeInsets.all(12),
           child: DropdownButtonFormField(
             initialValue: safeInitialValue,
-            decoration: InputDecoration(
-              labelText: labelText,
-              border: OutlineInputBorder(),
-            ),
-
+            decoration: defaultDecoration(context)
+                .copyWith(labelText: labelText),
             items: List<DropdownMenuItem>.generate(
               statuses.length,
               (int index) => DropdownMenuItem(

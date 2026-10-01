@@ -312,35 +312,29 @@ class _TicketFormState extends State<TicketForm> {
                               ),
                             ],
                           ),
-                          Flex(
-                            direction: direction,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: TextInput(
-                                  labelText: 'Briefing/Condições de Entrada',
-                                  initialValue:
-                                      widget.initialTicket.repairCondition,
-                                  maxLines: 4,
-                                  onSaved: (String value) {
-                                    repairCondition = value;
-                                  },
-                                ),
-                              ),
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: TextInput(
-                                  labelText: 'Diagnóstico',
-                                  initialValue:
-                                      widget.initialTicket.repairDiagnosis,
-                                  maxLines: 4,
-                                  onSaved: (String value) {
-                                    repairDiagnosis = value;
-                                  },
-                                ),
-                              ),
-                            ],
+                          TextInput(
+                            labelText: 'Briefing/Condições de Entrada',
+                            initialValue: widget.initialTicket.repairCondition,
+                            maxLines: 4,
+                            onSaved: (String value) {
+                              repairCondition = value;
+                            },
+                          ),
+                          TextInput(
+                            labelText: 'Diagnóstico',
+                            initialValue: widget.initialTicket.repairDiagnosis,
+                            maxLines: 4,
+                            onSaved: (String value) {
+                              repairDiagnosis = value;
+                            },
+                          ),
+                          TextInput(
+                            labelText: 'Obs.',
+                            maxLines: 4,
+                            initialValue: widget.initialTicket.obs,
+                            onSaved: (String value) {
+                              obs = value;
+                            },
                           ),
 
                           Flex(
@@ -379,44 +373,16 @@ class _TicketFormState extends State<TicketForm> {
                             ],
                           ),
 
-                          Flex(
-                            direction: direction,
-                            mainAxisSize: MainAxisSize.min,
-
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                fit: isSmallWidth
-                                    ? FlexFit.loose
-                                    : FlexFit.tight,
-                                child: Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: PartInput(
-                                    ticketId: widget.initialTicket.id,
-                                    parts: parts,
-                                    onModified: (parts) {
-                                      setState(() {
-                                        partsPrice = totalPartsPrice(parts);
-                                      });
-                                      _handleChanged();
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: TextInput(
-                                  labelText: 'Obs.',
-                                  maxLines: 4,
-                                  initialValue: widget.initialTicket.obs,
-                                  onSaved: (String value) {
-                                    obs = value;
-                                  },
-                                ),
-                              ),
-                            ],
+                          PartInput(
+                            ticketId: widget.initialTicket.id,
+                            parts: parts,
+                            onModified: (parts) {
+                              setState(() {
+                                partsPrice = totalPartsPrice(parts);
+                              });
+                              _handleChanged();
+                            },
                           ),
-
                           Flex(
                             direction: direction,
                             mainAxisSize: MainAxisSize.min,
