@@ -58,14 +58,16 @@ class TicketEdit extends ConsumerWidget {
             DBController().updatePart(part);
             parts.add(part);
           } else {
-            DBController().createPart(part);
-            parts.add(part);
+            final id = await DBController().createPart(part);
+            parts.add(part.copyWith(id: id));
           }
         }
 
         Ticket finalTicket = ticket.copyWith(id: id, parts: parts);
         ref.read(appStateProvider.notifier).setEditing(finalTicket);
         ref.read(appStateProvider.notifier).setModified(modified: false);
+
+        return parts;
       },
     );
   }

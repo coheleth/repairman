@@ -103,18 +103,6 @@ Future<Uint8List> ticketToPDF(Ticket ticket) async {
   final ticketWidget = [
     pw.Row(
       children: [
-        pw.Expanded(child: textDisplay('Cliente', ticket.clientName)),
-        pw.Expanded(child: textDisplay('CPF/CNPJ', ticket.clientDocument)),
-      ],
-    ),
-    pw.Row(
-      children: [
-        pw.Expanded(child: textDisplay('Endereço', ticket.clientAddress)),
-        pw.Expanded(child: textDisplay('Contato', ticket.clientContact)),
-      ],
-    ),
-    pw.Row(
-      children: [
         pw.Expanded(
           child: textDisplay('Data de Entrada', dateAsString(ticket.startDate)),
         ),
@@ -126,9 +114,26 @@ Future<Uint8List> ticketToPDF(Ticket ticket) async {
         ),
       ],
     ),
-    textDisplay('Aparelho/Equipamento', ticket.repairTarget),
-    textDisplay('Condições de Entrada', ticket.repairCondition),
-    textDisplay('Diagnóstico', ticket.repairDiagnosis),
+    pw.Row(
+      children: [
+        pw.Expanded(child: textDisplay('Cliente', ticket.clientName)),
+        pw.Expanded(child: textDisplay('CPF/CNPJ', ticket.clientDocument)),
+      ],
+    ),
+    pw.Row(
+      children: [
+        pw.Expanded(child: textDisplay('Endereço', ticket.clientAddress)),
+        pw.Expanded(child: textDisplay('Contato', ticket.clientContact)),
+      ],
+    ),
+    if ((ticket.location ?? "").isNotEmpty)
+      textDisplay('Local', ticket.location),
+    if ((ticket.repairTarget ?? "").isNotEmpty)
+      textDisplay('Aparelho/Equipamento', ticket.repairTarget),
+    if ((ticket.repairCondition ?? "").isNotEmpty)
+      textDisplay('Condições de Entrada', ticket.repairCondition),
+    if ((ticket.repairDiagnosis ?? "").isNotEmpty)
+      textDisplay('Diagnóstico', ticket.repairDiagnosis),
     pw.Row(
       children: [
         pw.Expanded(child: textDisplay('Serviço', ticket.service)),

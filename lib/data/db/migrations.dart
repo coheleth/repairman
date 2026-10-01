@@ -10,30 +10,34 @@ void onDatabaseCreate(Database db, int version) async {
     CREATE TABLE IF NOT EXISTS ticket (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       status_id INTEGER REFERENCES status (id),
-      service TEXT,
-      service_price REAL,
+      start_date INT,
+      delivery_date INT,
       client_name TEXT,
       client_document TEXT,
       client_address TEXT,
       client_contact TEXT,
+      location TEXT,
       repair_target TEXT,
       repair_condition TEXT,
       repair_diagnosis TEXT,
-      start_date INT,
-      delivery_date INT
+      service TEXT,
+      service_price REAL,
+      obs TEXT
     );
     CREATE TABLE IF NOT EXISTS part (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ticket_id INTEGER REFERENCES ticket (id),
       name TEXT,
       quantity REAL,
-      price REAL
+      price REAL,
+      ticked INTEGER
     );
   ''');
   await db.insert('status', {'name': 'Não Iniciado', 'sort_order': 0});
-  await db.insert('status', {'name': 'Em Andamento', 'sort_order': 1});
-  await db.insert('status', {'name': 'Finalizado', 'sort_order': 2});
-  await db.insert('status', {'name': 'Entregue', 'sort_order': 3});
+  await db.insert('status', {'name': 'Aguardando Materiais', 'sort_order': 1});
+  await db.insert('status', {'name': 'Em Andamento', 'sort_order': 2});
+  await db.insert('status', {'name': 'Finalizado', 'sort_order': 3});
+  await db.insert('status', {'name': 'Entregue', 'sort_order': 4});
 }
 
-void onDatabaseUpdate(Database db, int oldVersion, int newVersion) async {}
+void onDatabaseUpgrade(Database db, int oldVersion, int newVersion) async {}

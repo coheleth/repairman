@@ -14,9 +14,12 @@ class Ticket {
   final String? clientDocument;
   final String? clientAddress;
   final String? clientContact;
+  final String? location;
   final String? repairTarget;
   final String? repairCondition;
   final String? repairDiagnosis;
+  final String? obs;
+
   final String? statusName;
   final List<Part>? parts;
 
@@ -31,9 +34,11 @@ class Ticket {
     this.clientDocument,
     this.clientAddress,
     this.clientContact,
+    this.location,
     this.repairTarget,
     this.repairCondition,
     this.repairDiagnosis,
+    this.obs,
     this.statusName,
     this.parts,
   });
@@ -53,9 +58,11 @@ class Ticket {
     clientDocument: map['client_document'],
     clientAddress: map['client_address'],
     clientContact: map['client_contact'],
+    location: map['location'],
     repairTarget: map['repair_target'],
     repairCondition: map['repair_condition'],
     repairDiagnosis: map['repair_diagnosis'],
+    obs: map['obs'],
     statusName: map['status_name'] ?? '',
   );
 
@@ -74,9 +81,11 @@ class Ticket {
     'client_document': clientDocument,
     'client_address': clientAddress,
     'client_contact': clientContact,
+    'location': location,
     'repair_target': repairTarget,
     'repair_condition': repairCondition,
     'repair_diagnosis': repairDiagnosis,
+    'obs': obs,
   };
 
   Ticket copyWith({
@@ -90,9 +99,11 @@ class Ticket {
     String? clientDocument,
     String? clientAddress,
     String? clientContact,
+    String? location,
     String? repairTarget,
     String? repairCondition,
     String? repairDiagnosis,
+    String? obs,
     String? statusName,
     List<Part>? parts,
   }) => Ticket(
@@ -106,9 +117,11 @@ class Ticket {
     clientDocument: clientDocument ?? this.clientDocument,
     clientAddress: clientAddress ?? this.clientAddress,
     clientContact: clientContact ?? this.clientContact,
+    location: location ?? this.location,
     repairTarget: repairTarget ?? this.repairTarget,
     repairCondition: repairCondition ?? this.repairCondition,
     repairDiagnosis: repairDiagnosis ?? this.repairDiagnosis,
+    obs: obs ?? this.obs,
     statusName: statusName ?? this.statusName,
     parts: parts ?? this.parts,
   );

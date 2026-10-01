@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:repairman/components/number_input.dart';
+import 'package:repairman/messaging.dart';
 import 'package:repairman/utils.dart';
 import 'package:repairman/data/models/part.dart';
+import 'package:repairman/components/number_input.dart';
 
 class PartEditor extends StatefulWidget {
   final int ticketId;
@@ -28,6 +29,7 @@ class _PartEditorState extends State<PartEditor> {
         name: "",
         quantity: 1,
         price: 0,
+        ticked: false,
       );
     }
     return Dialog(
@@ -114,7 +116,7 @@ class _PartEditorState extends State<PartEditor> {
 class PartInput extends StatefulWidget {
   final int ticketId;
   final List<Part> parts;
-  final Function? onModified;
+  final Function(List<Part> parts)? onModified;
   const PartInput({
     super.key,
     required this.ticketId,
@@ -129,6 +131,15 @@ class PartInput extends StatefulWidget {
 class _PartInputState extends State<PartInput> {
   List<Part> parts = [];
 
+  Part emptyPart() => Part(
+    id: -1,
+    ticketId: widget.ticketId,
+    name: "",
+    quantity: 0,
+    price: 0,
+    ticked: false,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -140,20 +151,37 @@ class _PartInputState extends State<PartInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Materiais/Peças'),
+        Text('Materiais'),
         Table(
           columnWidths: {
-            0: FlexColumnWidth(),
-            1: IntrinsicColumnWidth(),
+            0: IntrinsicColumnWidth(),
+            1: FlexColumnWidth(),
             2: IntrinsicColumnWidth(),
             3: IntrinsicColumnWidth(),
             4: IntrinsicColumnWidth(),
+            5: IntrinsicColumnWidth(),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: List<TableRow>.generate(
             parts.length,
             (index) => TableRow(
               children: [
+                Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Checkbox(
+                    value: parts[index].ticked,
+                    onChanged: (value) {
+                      setState(() {
+                        parts[index] = parts[index].copyWith(ticked: value);
+                        widget.parts[index] = widget.parts[index].copyWith(
+                          ticked: value,
+                        );
+                      });
+
+                      widget.onModified?.call(parts);
+                    },
+                  ),
+                ),
                 Padding(
                   padding: EdgeInsets.all(6),
                   child: Text(parts[index].name),
@@ -182,66 +210,51 @@ class _PartInputState extends State<PartInput> {
                         parts[index] = newPart;
                         widget.parts[index] = newPart;
                       });
-                      if (widget.onModified != null) {
-                        widget.onModified!();
-                      }
+
+                      widget.onModified?.call(parts);
                     }
                   },
 
                   icon: Icon(Icons.edit_outlined),
                 ),
                 IconButton(
-                  onPressed: () async {
-                    bool confirmed = false;
-                    await showDialog(
-                      context: context,
-                      builder: (BuildContext dialogContext) {
-                        return AlertDialog(
-                          title: Text('Remover "${parts[index].name}"?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(dialogContext);
-                                confirmed = true;
-                              },
-                              child: Text('Sim'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(dialogContext);
-                                return;
-                              },
-                              autofocus: true,
-                              child: Text('Não'),
-                            ),
-                          ],
-                        );
-                      },
+                  onPressed: () {
+                    Part targetPart = widget.parts.firstWhere(
+                      (part) => part == parts[index],
+                      orElse: () => emptyPart(),
                     );
-                    if (confirmed) {
-                      Part targetPart = widget.parts.firstWhere(
-                        (part) => part == parts[index],
-                        orElse: () => Part(
-                          id: -1,
-                          ticketId: -1,
-                          name: '',
-                          quantity: 0,
-                          price: 0,
-                        ),
-                      );
-                      widget.parts[widget.parts.indexWhere(
-                        (part) => part == targetPart,
-                      )] = targetPart.copyWith(
-                        markedForRemoval: true,
-                      );
-                      setState(() {
-                        parts.removeAt(index);
-                      });
+                    final int finalIndex = widget.parts.indexWhere(
+                      (part) => part == targetPart,
+                    );
+                    widget.parts[finalIndex] = targetPart.copyWith(
+                      markedForRemoval: true,
+                    );
+                    setState(() {
+                      parts.removeAt(index);
+                    });
 
-                      if (widget.onModified != null) {
-                        widget.onModified!();
-                      }
-                    }
+                    widget.onModified?.call(parts);
+
+                    MessagingController().sendSnackBar(
+                      SnackBar(
+                        content: Text('Material "${targetPart.name}" Removido'),
+                        persist: false,
+                        action: SnackBarAction(
+                          label: 'Desfazer',
+                          onPressed: () {
+                            final finalPart = targetPart.copyWith(
+                              markedForRemoval: false,
+                            );
+                            widget.parts[finalIndex] = finalPart;
+                            setState(() {
+                              parts.insert(index, finalPart);
+                            });
+
+                            widget.onModified?.call(parts);
+                          },
+                        ),
+                      ),
+                    );
                   },
                   icon: Icon(Icons.delete_forever_outlined),
                 ),
@@ -253,16 +266,8 @@ class _PartInputState extends State<PartInput> {
           onPressed: () async {
             final Part? newPart = await showDialog(
               context: context,
-              builder: (BuildContext context) => PartEditor(
-                ticketId: widget.ticketId,
-                part: Part(
-                  id: -1,
-                  ticketId: widget.ticketId,
-                  name: "",
-                  quantity: 0,
-                  price: 0,
-                ),
-              ),
+              builder: (BuildContext context) =>
+                  PartEditor(ticketId: widget.ticketId, part: emptyPart()),
             );
             if (newPart != null) {
               setState(() {
@@ -270,9 +275,7 @@ class _PartInputState extends State<PartInput> {
                 widget.parts.add(newPart);
               });
 
-              if (widget.onModified != null) {
-                widget.onModified!();
-              }
+              widget.onModified?.call(parts);
             }
           },
           icon: Icon(Icons.add),

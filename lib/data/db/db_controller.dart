@@ -33,7 +33,12 @@ class DBController {
     WidgetsFlutterBinding.ensureInitialized();
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, databaseFolder, databaseFile);
-    return openDatabase(path, version: 1, onCreate: onDatabaseCreate);
+    return openDatabase(
+      path,
+      version: 1,
+      onCreate: onDatabaseCreate,
+      onUpgrade: onDatabaseUpgrade,
+    );
   }
 
   Future<List<Status>> getAllStatus() async {
@@ -205,7 +210,8 @@ class DBController {
     final db = await database;
     final map = part.toMap();
     map.remove('id');
-    return await db.insert('part', map);
+    final id = await db.insert('part', map);
+    return id;
   }
 
   Future<int> updatePart(Part part) async {

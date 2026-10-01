@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 
 class NumberInput extends StatefulWidget {
   final String labelText;
-  final Function(double? value) onSaved;
+  final Function(double? value)? onSaved;
+  final Function(double? value)? onChanged;
   final String? initialValue;
   final RegExp? regex;
   final bool comma;
@@ -11,7 +12,8 @@ class NumberInput extends StatefulWidget {
   const NumberInput({
     super.key,
     required this.labelText,
-    required this.onSaved,
+    this.onSaved,
+    this.onChanged,
     this.initialValue,
     this.regex,
     this.comma = false,
@@ -42,9 +44,19 @@ class _NumberInputState extends State<NumberInput> {
             if (widget.comma) {
               value = value!.replaceAll(',', '.');
             }
-            widget.onSaved(double.parse(value!));
+            widget.onSaved?.call(double.parse(value!));
           } else {
-            widget.onSaved(null);
+            widget.onSaved?.call(null);
+          }
+        },
+        onChanged: (value) {
+          if (value != "") {
+            if (widget.comma) {
+              value = value.replaceAll(',', '.');
+            }
+            widget.onChanged?.call(double.parse(value));
+          } else {
+            widget.onChanged?.call(null);
           }
         },
       ),

@@ -21,47 +21,7 @@ class TicketCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appState = ref.watch(appStateProvider);
-    final bool isThisTicketOpen = (appState.openTicket?.id ?? -1) == ticket.id;
-    final contents = TicketCardContents(
-      ticket: ticket,
-      sortMode: sortMode,
-      onTap: onTap,
-      navigatorKey: navigatorKey,
-      active: isThisTicketOpen,
-    );
-    return (appState.isEditing)
-        ? contents
-        : LayoutBuilder(
-            builder: ((context, constraints) {
-              return LongPressDraggable(
-                data: ticket.id,
-                feedback: SizedBox(
-                  width: constraints.maxWidth,
-                  child: contents,
-                ),
-                child: contents,
-              );
-            }),
-          );
-  }
-}
-
-class TicketCardContents extends StatelessWidget {
-  final Ticket ticket;
-  final TicketSortMode sortMode;
-  final GestureTapCallback onTap;
-  final GlobalKey<NavigatorState> navigatorKey;
-  final bool active;
-  const TicketCardContents({
-    super.key,
-    required this.ticket,
-    required this.sortMode,
-    required this.onTap,
-    required this.navigatorKey,
-    this.active = false,
-  });
-  @override
-  Widget build(BuildContext context) {
+    final bool active = (appState.openTicket?.id ?? -1) == ticket.id;
     String subtitle;
 
     switch (sortMode) {

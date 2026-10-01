@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:repairman/views/ticket_dashboard.dart';
+import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
 
 void main() {
@@ -36,7 +37,19 @@ class MyApp extends StatelessWidget {
               //     brightness: Brightness.dark,
               //   ),
               // ),
-              home: TicketDashboard(),
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    MessagingController().on<SnackBarEvent>().listen((event) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(event.snackBar);
+                      }
+                    });
+                    return TicketDashboard();
+                  },
+                ),
+              ),
               debugShowCheckedModeBanner: false,
             ),
           ),

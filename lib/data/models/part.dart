@@ -7,6 +7,7 @@ class Part {
   final String name;
   final double quantity;
   final double price;
+  final bool ticked;
   final bool markedForRemoval;
 
   const Part({
@@ -15,6 +16,7 @@ class Part {
     required this.name,
     required this.quantity,
     required this.price,
+    required this.ticked,
     this.markedForRemoval = false,
   });
 
@@ -24,22 +26,7 @@ class Part {
     name: map['name'],
     quantity: map['quantity'],
     price: map['price'],
-  );
-
-  Part copyWith({
-    int? id,
-    int? ticketId,
-    String? name,
-    double? quantity,
-    double? price,
-    bool? markedForRemoval,
-  }) => Part(
-    id: id ?? this.id,
-    ticketId: ticketId ?? this.ticketId,
-    name: name ?? this.name,
-    quantity: quantity ?? this.quantity,
-    price: price ?? this.price,
-    markedForRemoval: markedForRemoval ?? this.markedForRemoval,
+    ticked: map['ticked'] > 0,
   );
 
   Map<String, dynamic> toMap() => {
@@ -48,5 +35,24 @@ class Part {
     'name': name,
     'quantity': quantity,
     'price': price,
+    'ticked': ticked ? 1 : 0,
   };
+
+  Part copyWith({
+    int? id,
+    int? ticketId,
+    String? name,
+    double? quantity,
+    double? price,
+    bool? ticked,
+    bool? markedForRemoval,
+  }) => Part(
+    id: id ?? this.id,
+    ticketId: ticketId ?? this.ticketId,
+    name: name ?? this.name,
+    quantity: quantity ?? this.quantity,
+    price: price ?? this.price,
+    ticked: ticked ?? this.ticked,
+    markedForRemoval: markedForRemoval ?? this.markedForRemoval,
+  );
 }

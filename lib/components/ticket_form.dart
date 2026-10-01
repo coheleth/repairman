@@ -9,6 +9,7 @@ import 'package:repairman/components/date_picker.dart';
 import 'package:repairman/components/text_input.dart';
 import 'package:repairman/components/part_input.dart';
 import 'package:repairman/components/status_dropdown.dart';
+import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/utils.dart';
 
@@ -21,7 +22,7 @@ class TicketForm extends StatefulWidget {
   final Ticket initialTicket;
   final bool isCreating;
   final Function()? onClose;
-  final Function(Ticket ticket)? onSave;
+  final Future<List<Part>> Function(Ticket ticket)? onSave;
   final Function? onChanged;
   const TicketForm({
     super.key,
@@ -47,50 +48,65 @@ class _TicketFormState extends State<TicketForm> {
   String? clientDocument;
   String? clientAddress;
   String? clientContact;
+  String? location;
   String? repairTarget;
   String? repairCondition;
   String? repairDiagnosis;
+  String? obs;
+
+  double partsPrice = 0;
   List<Part> parts = [];
 
   bool modified = false;
+  bool canSave = true;
 
   final _formKey = GlobalKey<FormState>();
 
-  void _handleSave() async {
-    _formKey.currentState!.save();
+  void _handleSave(BuildContext context) async {
+    if (canSave) {
+      canSave = false;
+      _formKey.currentState!.save();
 
-    if (_formKey.currentState!.validate()) {
-      Ticket finalTicket = Ticket(
-        id: widget.initialTicket.id,
-        service: service,
-        servicePrice: servicePrice,
-        statusId: statusId,
-        startDate: startDate,
-        deliveryDate: deliveryDate,
-        clientName: clientName,
-        clientDocument: clientDocument,
-        clientAddress: clientAddress,
-        clientContact: clientContact,
-        repairTarget: repairTarget,
-        repairCondition: repairCondition,
-        repairDiagnosis: repairDiagnosis,
-        parts: parts,
-      );
-      if (widget.onSave != null) {
-        widget.onSave!(finalTicket);
+      if (_formKey.currentState!.validate()) {
+        Ticket finalTicket = Ticket(
+          id: widget.initialTicket.id,
+          service: service,
+          servicePrice: servicePrice,
+          statusId: statusId,
+          startDate: startDate,
+          deliveryDate: deliveryDate,
+          clientName: clientName,
+          clientDocument: clientDocument,
+          clientAddress: clientAddress,
+          clientContact: clientContact,
+          repairTarget: repairTarget,
+          repairCondition: repairCondition,
+          repairDiagnosis: repairDiagnosis,
+          parts: parts,
+        );
+
+        final newParts = await widget.onSave?.call(finalTicket);
+
+        setState(() {
+          parts = newParts ?? parts;
+          modified = false;
+        });
+        MessagingController().sendSnackBar(
+          SnackBar(content: const Text('Alterações Salvas')),
+        );
+      } else {
+        canSave = true;
       }
-      setState(() {
-        modified = false;
-      });
     }
   }
 
   void _handleChanged() {
-    if (!modified && widget.onChanged != null) {
+    if (!modified) {
       setState(() {
+        canSave = true;
         modified = true;
       });
-      widget.onChanged!();
+      widget.onChanged?.call();
     }
   }
 
@@ -103,7 +119,11 @@ class _TicketFormState extends State<TicketForm> {
 
   @override
   Widget build(BuildContext context) {
-    ShortcutController().on<SaveEvent>().listen((context) => _handleSave());
+    ShortcutController().on<SaveEvent>().listen((eventContext) {
+      if (context.mounted) {
+        _handleSave(context);
+      }
+    });
     return Focus(
       autofocus: true,
       child: Scaffold(
@@ -124,7 +144,11 @@ class _TicketFormState extends State<TicketForm> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
                 child: FilledButton.icon(
-                  onPressed: _handleSave,
+                  onPressed: () {
+                    if (context.mounted) {
+                      _handleSave(context);
+                    }
+                  },
                   label: Text('Salvar'),
                   icon: Icon(Icons.save),
                 ),
@@ -141,13 +165,21 @@ class _TicketFormState extends State<TicketForm> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
+            final double minWidth = 500;
+            final double maxWidth = 800;
+            final bool isSmallWidth = constraints.maxWidth < maxWidth;
+            final Axis direction = isSmallWidth
+                ? Axis.vertical
+                : Axis.horizontal;
             return Center(
               heightFactor: 1.0,
               child: SizedBox(
-                width: min(800, constraints.maxWidth),
+                width: isSmallWidth
+                    ? min(minWidth, constraints.maxWidth)
+                    : min(maxWidth, constraints.maxWidth),
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsetsGeometry.only(top: 56),
+                    padding: EdgeInsets.symmetric(vertical: 56),
                     child: Form(
                       onChanged: _handleChanged,
                       key: _formKey,
@@ -156,10 +188,50 @@ class _TicketFormState extends State<TicketForm> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Flex(
-                            direction: Axis.horizontal,
+                            direction: direction,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: DatePicker(
+                                  labelText: 'Data de Entrada',
+                                  initialDate: widget.initialTicket.startDate,
+                                  onChanged: (DateTime? value) {
+                                    startDate = value;
+                                  },
+                                ),
+                              ),
+
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: DatePicker(
+                                  labelText: 'Prometido Para',
+                                  initialDate:
+                                      widget.initialTicket.deliveryDate,
+                                  onChanged: (DateTime? value) {
+                                    deliveryDate = value;
+                                  },
+                                ),
+                              ),
+
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: StatusDropdown(
+                                  labelText: 'Status',
+                                  initialValue: widget.initialTicket.statusId,
+                                  onChanged: (int value) {
+                                    statusId = value;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Flex(
+                            direction: direction,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
                                   labelText: 'Cliente',
                                   initialValue: widget.initialTicket.clientName,
@@ -168,7 +240,9 @@ class _TicketFormState extends State<TicketForm> {
                                   },
                                 ),
                               ),
-                              Expanded(
+
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
                                   labelText: 'CPF/CNPJ',
                                   initialValue:
@@ -181,10 +255,11 @@ class _TicketFormState extends State<TicketForm> {
                             ],
                           ),
                           Flex(
-                            direction: Axis.horizontal,
+                            direction: direction,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
                                   labelText: 'Endereço',
                                   initialValue:
@@ -195,7 +270,9 @@ class _TicketFormState extends State<TicketForm> {
                                   },
                                 ),
                               ),
-                              Expanded(
+
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
                                   labelText: 'Contato',
                                   initialValue:
@@ -208,49 +285,24 @@ class _TicketFormState extends State<TicketForm> {
                               ),
                             ],
                           ),
-
                           Flex(
-                            direction: Axis.horizontal,
+                            direction: direction,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
-                                child: DatePicker(
-                                  labelText: 'Data de Entrada',
-                                  initialDate: widget.initialTicket.startDate,
-                                  onChanged: (DateTime? value) {
-                                    startDate = value;
-                                  },
-                                ),
-                              ),
-                              Expanded(
-                                child: DatePicker(
-                                  labelText: 'Prometido Para',
-                                  initialDate:
-                                      widget.initialTicket.deliveryDate,
-                                  onChanged: (DateTime? value) {
-                                    deliveryDate = value;
-                                  },
-                                ),
-                              ),
-                              Expanded(
-                                child: StatusDropdown(
-                                  labelText: 'Status',
-                                  initialValue: widget.initialTicket.statusId,
-                                  onChanged: (int value) {
-                                    statusId = value;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          Flex(
-                            direction: Axis.horizontal,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Aparelho/Equipamento',
+                                  labelText: 'Local',
+                                  initialValue: widget.initialTicket.location,
+                                  onSaved: (String value) {
+                                    location = value;
+                                  },
+                                ),
+                              ),
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: TextInput(
+                                  labelText: 'Objeto/Equipamento',
                                   initialValue:
                                       widget.initialTicket.repairTarget,
                                   onSaved: (String value) {
@@ -260,14 +312,14 @@ class _TicketFormState extends State<TicketForm> {
                               ),
                             ],
                           ),
-
                           Flex(
-                            direction: Axis.horizontal,
+                            direction: direction,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Condições de Entrada',
+                                  labelText: 'Briefing/Condições de Entrada',
                                   initialValue:
                                       widget.initialTicket.repairCondition,
                                   maxLines: 4,
@@ -276,7 +328,8 @@ class _TicketFormState extends State<TicketForm> {
                                   },
                                 ),
                               ),
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
                                 child: TextInput(
                                   labelText: 'Diagnóstico',
                                   initialValue:
@@ -291,43 +344,105 @@ class _TicketFormState extends State<TicketForm> {
                           ),
 
                           Flex(
-                            direction: Axis.horizontal,
+                            direction: direction,
                             mainAxisSize: MainAxisSize.min,
+
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    TextInput(
-                                      labelText: 'Serviço',
-                                      initialValue:
-                                          widget.initialTicket.service,
-                                      onSaved: (String value) {
-                                        service = value;
-                                      },
-                                      required: true,
-                                    ),
-                                    NumberInput(
-                                      labelText: 'Mão de Obra (R\$)',
-                                      initialValue: priceAsString(
-                                        widget.initialTicket.servicePrice,
-                                      ),
-                                      comma: true,
-                                      regex: RegExp(r'^\d*\,?\d{0,2}'),
-                                      onSaved: (value) {
-                                        servicePrice = value;
-                                      },
-                                    ),
-                                  ],
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: TextInput(
+                                  labelText: 'Serviço',
+                                  initialValue: widget.initialTicket.service,
+                                  onSaved: (String value) {
+                                    service = value;
+                                  },
+                                  required: true,
                                 ),
                               ),
-                              Expanded(
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: NumberInput(
+                                  labelText: 'Mão de Obra (R\$)',
+                                  initialValue: priceAsString(
+                                    widget.initialTicket.servicePrice,
+                                  ),
+                                  comma: true,
+                                  regex: RegExp(r'^\d*\,?\d{0,2}'),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      servicePrice = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Flex(
+                            direction: direction,
+                            mainAxisSize: MainAxisSize.min,
+
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                fit: isSmallWidth
+                                    ? FlexFit.loose
+                                    : FlexFit.tight,
                                 child: Padding(
                                   padding: EdgeInsets.all(12),
                                   child: PartInput(
                                     ticketId: widget.initialTicket.id,
                                     parts: parts,
-                                    onModified: _handleChanged,
+                                    onModified: (parts) {
+                                      setState(() {
+                                        partsPrice = totalPartsPrice(parts);
+                                      });
+                                      _handleChanged();
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: TextInput(
+                                  labelText: 'Obs.',
+                                  maxLines: 4,
+                                  initialValue: widget.initialTicket.obs,
+                                  onSaved: (String value) {
+                                    obs = value;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Flex(
+                            direction: direction,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Valor Total',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                      Text(
+                                        'R\$${priceAsString((servicePrice ?? 0) + partsPrice, comma: true)}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
