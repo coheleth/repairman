@@ -35,12 +35,13 @@ class TicketList extends _$TicketList {
     ];
   }
 
-  void create(Ticket ticket) async {
+  Future<int> create(Ticket ticket) async {
     final id = await DBController().createTicket(ticket);
     final ticketSort = ref.read(ticketSortProvider);
     if (ticketSort.status == ticket.statusId || ticketSort.status == 0) {
       state = [ticket.copyWith(id: id), ...state];
     }
+    return id;
   }
 
   void delete(int id) {

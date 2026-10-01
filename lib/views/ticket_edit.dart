@@ -40,10 +40,18 @@ class TicketEdit extends ConsumerWidget {
           }
         }
       },
-      onSave: (ticket) {
+      onSave: (ticket) async {
+        int id = ticket.id;
+
+        if (isCreating) {
+          id = await ref.read(ticketListProvider.notifier).create(ticket);
+        } else {
+          ref.read(ticketListProvider.notifier).update(ticket);
+        }
+
         List<Part> parts = [];
         for (Part originalPart in ticket.parts ?? []) {
-          final part = originalPart.copyWith(ticketId: ticket.id);
+          final part = originalPart.copyWith(ticketId: id);
           if (part.markedForRemoval && part.id > 0) {
             DBController().deletePartById(part.id);
           } else if (part.id > 0) {
@@ -55,19 +63,9 @@ class TicketEdit extends ConsumerWidget {
           }
         }
 
-        Ticket finalTicket = ticket.copyWith(parts: parts);
-
-        if (isCreating) {
-          ref.read(ticketListProvider.notifier).create(finalTicket);
-          ref.read(appStateProvider.notifier).setEditing(finalTicket);
-        } else {
-          ref.read(ticketListProvider.notifier).update(finalTicket);
-          ref.read(appStateProvider.notifier).setTicket(finalTicket);
-        }
-
-        // ref.read(appStateProvider.notifier).setIdle();
-        // Navigator.of(context).popUntil((route) => route.isFirst);
-        // Navigator.of(context).pushNamed('view');
+        Ticket finalTicket = ticket.copyWith(id: id, parts: parts);
+        ref.read(appStateProvider.notifier).setEditing(finalTicket);
+        ref.read(appStateProvider.notifier).setModified(modified: false);
       },
     );
   }

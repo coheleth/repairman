@@ -79,6 +79,9 @@ class _TicketFormState extends State<TicketForm> {
       if (widget.onSave != null) {
         widget.onSave!(finalTicket);
       }
+      setState(() {
+        modified = false;
+      });
     }
   }
 
@@ -120,12 +123,13 @@ class _TicketFormState extends State<TicketForm> {
             if (modified)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
-                child: FilledButton(
+                child: FilledButton.icon(
                   onPressed: _handleSave,
-                  child: Text('Salvar'),
+                  label: Text('Salvar'),
+                  icon: Icon(Icons.save),
                 ),
               ),
-            if (!widget.isCreating)
+            if (!modified && !widget.isCreating)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
                 child: TicketContextMenu(

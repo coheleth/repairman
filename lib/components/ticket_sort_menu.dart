@@ -18,16 +18,6 @@ class TicketSortMenu extends ConsumerWidget {
       ref.read(ticketSortProvider.notifier).setSort(sortMode, sortDirection);
     }
 
-    IconData? sortDirectionIcon;
-    // if (active) {
-    if (sortDirection == TicketSortDirection.ascending) {
-      sortDirectionIcon = Icons.arrow_upward_outlined;
-    }
-    if (sortDirection == TicketSortDirection.descending) {
-      sortDirectionIcon = Icons.arrow_downward_outlined;
-    }
-    // }
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: Row(

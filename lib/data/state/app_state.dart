@@ -84,8 +84,8 @@ class AppState extends _$AppState {
     );
   }
 
-  void setModified() {
-    state = state.copyWith(modified: true);
+  void setModified({bool? modified}) {
+    state = state.copyWith(modified: modified ?? true);
   }
 
   void setTicket(Ticket? ticket) {

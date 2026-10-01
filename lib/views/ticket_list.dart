@@ -55,7 +55,7 @@ class TicketList extends ConsumerWidget {
                   onPressed: () {
                     _handleNew(context, ref);
                   },
-                  label: Text('Nova Ordem de Serviço'),
+                  label: Text('Criar Ordem de Serviço'),
                   icon: Icon(Icons.add),
                 ),
               ),
