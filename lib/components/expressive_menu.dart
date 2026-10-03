@@ -8,16 +8,19 @@ class ExpressiveMenu extends StatelessWidget {
   )
   builder;
   final List<Widget> menuChildren;
+  final MenuController? controller;
   const ExpressiveMenu({
     super.key,
     required this.builder,
     required this.menuChildren,
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
       animated: true,
+      controller: controller,
       style: MenuStyle(
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -72,19 +75,11 @@ class ExpressiveMenuItem extends StatelessWidget {
           foregroundColor: WidgetStateProperty.resolveWith<Color?>((
             Set<WidgetState> states,
           ) {
-            // if (active) {
-            //   return Theme.of(context).colorScheme.onPrimaryContainer;
-            // }
-            // return Theme.of(context).colorScheme.onSurfaceVariant;
             return Theme.of(context).colorScheme.onPrimaryContainer;
           }),
           iconColor: WidgetStateProperty.resolveWith<Color?>((
             Set<WidgetState> states,
           ) {
-            // if (active) {
-            //   return Theme.of(context).colorScheme.onPrimaryContainer;
-            // }
-            // return Theme.of(context).colorScheme.onSurfaceVariant;
             return Theme.of(context).colorScheme.onPrimaryContainer;
           }),
         ),

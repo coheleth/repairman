@@ -93,9 +93,11 @@ class DBController {
     final db = await database;
     final res = await db.query('ticket', where: 'id = ?', whereArgs: [id]);
     var ticket = Ticket.fromMap(res.first);
-    final statusName = (await getStatusById(ticket.statusId))?.name ?? '';
+    final status = await getStatusById(ticket.statusId);
+    final statusName = status?.name ?? '';
+    final done = status?.done;
     final parts = await getPartsByTicketId(ticket.id);
-    ticket = ticket.copyWith(statusName: statusName, parts: parts);
+    ticket = ticket.copyWith(statusName: statusName, done: done, parts: parts);
     return ticket;
   }
 

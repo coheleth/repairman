@@ -16,7 +16,7 @@ class TicketDashboard extends StatelessWidget {
           children: [
             if (MediaQuery.of(context).size.width >= 800)
               SizedBox(
-                width: 400,
+                width: 360,
                 child: Navigator(
                   onGenerateRoute: (settings) => MaterialPageRoute(
                     builder: (context) =>

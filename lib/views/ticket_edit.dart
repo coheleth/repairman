@@ -8,8 +8,9 @@ import 'package:repairman/utils.dart';
 import 'package:repairman/data/db/db_controller.dart';
 import 'package:repairman/data/state/app_state.dart';
 import 'package:repairman/data/state/ticket_list.dart';
-import 'package:repairman/data/models/part.dart';
+import 'package:repairman/data/models/status.dart';
 import 'package:repairman/data/models/ticket.dart';
+import 'package:repairman/data/models/part.dart';
 import 'package:repairman/components/confirm_close.dart';
 import 'package:repairman/components/number_input.dart';
 import 'package:repairman/components/ticket_context_menu.dart';
@@ -17,71 +18,6 @@ import 'package:repairman/components/date_picker.dart';
 import 'package:repairman/components/text_input.dart';
 import 'package:repairman/components/part_input.dart';
 import 'package:repairman/components/status_dropdown.dart';
-
-// class TicketEdit extends ConsumerWidget {
-//   final GlobalKey<NavigatorState> navigatorKey;
-//   const TicketEdit({super.key, required this.navigatorKey});
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final isCreating = ref.watch(appStateProvider).isCreating;
-//     final initialTicket =
-//         ref.watch(appStateProvider).openTicket ??
-//         Ticket(id: -1, service: '', statusId: 0);
-
-//     return TicketForm(
-//       navigatorKey: navigatorKey,
-//       initialTicket: initialTicket,
-//       isCreating: isCreating,
-//       onChanged: () {
-//         ref.read(appStateProvider.notifier).setModified();
-//       },
-//       onClose: () async {
-//         if (!await confirmClose(context, ref)) {
-//           return;
-//         }
-
-//         if (context.mounted) {
-//           ref.read(appStateProvider.notifier).setIdle();
-//           if (ref.read(appStateProvider).openTicket != null) {
-//             Navigator.of(context).pop();
-//           } else {
-//             Navigator.of(context).popUntil((route) => route.isFirst);
-//           }
-//         }
-//       },
-//       onSave: (ticket) async {
-//         int id = ticket.id;
-
-//         if (isCreating) {
-//           id = await ref.read(ticketListProvider.notifier).create(ticket);
-//         } else {
-//           ref.read(ticketListProvider.notifier).update(ticket);
-//         }
-
-//         List<Part> parts = [];
-//         for (Part originalPart in ticket.parts ?? []) {
-//           final part = originalPart.copyWith(ticketId: id);
-//           if (part.markedForRemoval && part.id > 0) {
-//             DBController().deletePartById(part.id);
-//           } else if (part.id > 0) {
-//             DBController().updatePart(part);
-//             parts.add(part);
-//           } else {
-//             final id = await DBController().createPart(part);
-//             parts.add(part.copyWith(id: id));
-//           }
-//         }
-
-//         Ticket finalTicket = ticket.copyWith(id: id, parts: parts);
-//         ref.read(appStateProvider.notifier).setEditing(finalTicket);
-//         ref.read(appStateProvider.notifier).setModified(modified: false);
-
-//         return parts;
-//       },
-//     );
-//   }
-// }
 
 class TicketEdit extends ConsumerStatefulWidget {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -124,6 +60,8 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
       _formKey.currentState!.save();
 
       if (_formKey.currentState!.validate()) {
+        final status = await DBController().getStatusById(statusId);
+
         Ticket ticket = Ticket(
           id: initialTicket.id,
           service: service,
@@ -138,7 +76,8 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
           repairTarget: repairTarget,
           repairCondition: repairCondition,
           repairDiagnosis: repairDiagnosis,
-          statusName: await DBController().getStatusName(statusId),
+          statusName: status?.name ?? '',
+          done: status?.done ?? Done.inProgress,
           parts: parts,
         );
 
@@ -266,10 +205,13 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
             if (!modified && !isCreating)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
-                child: TicketContextMenu(
+
+                child: TicketMenu(
+                  context: context,
+                  ref: ref,
                   ticketId: initialTicket.id,
                   navigatorKey: widget.navigatorKey,
-                ),
+                ).moreMenu(),
               ),
           ],
         ),

@@ -31,12 +31,12 @@ class MyApp extends StatelessWidget {
             child: MaterialApp(
               title: 'Repairman',
               theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.cyan)),
-              // darkTheme: ThemeData(
-              //   colorScheme: .fromSeed(
-              //     seedColor: Colors.cyan,
-              //     brightness: Brightness.dark,
-              //   ),
-              // ),
+              darkTheme: ThemeData(
+                colorScheme: .fromSeed(
+                  seedColor: Colors.cyan,
+                  brightness: Brightness.dark,
+                ),
+              ),
               home: Scaffold(
                 body: Builder(
                   builder: (context) {

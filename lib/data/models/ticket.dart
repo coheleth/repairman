@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 import 'package:repairman/utils.dart';
+import 'package:repairman/data/models/status.dart';
 import 'package:repairman/data/models/part.dart';
 
 @immutable
@@ -22,6 +23,7 @@ class Ticket {
   final String? obs;
 
   final String? statusName;
+  final Done done;
   final List<Part>? parts;
 
   const Ticket({
@@ -42,6 +44,7 @@ class Ticket {
     this.obs,
     this.statusName,
     this.parts,
+    this.done = Done.inProgress,
   });
 
   factory Ticket.empty() => Ticket(id: -1, statusId: 0, service: '');
@@ -67,6 +70,7 @@ class Ticket {
     repairDiagnosis: map['repair_diagnosis'],
     obs: map['obs'],
     statusName: map['status_name'] ?? '',
+    done: map['done'] ?? Done.inProgress,
   );
 
   Map<String, dynamic> toMap() => {
@@ -108,6 +112,7 @@ class Ticket {
     String? repairDiagnosis,
     String? obs,
     String? statusName,
+    Done? done,
     List<Part>? parts,
   }) => Ticket(
     id: id ?? this.id,
@@ -126,6 +131,7 @@ class Ticket {
     repairDiagnosis: repairDiagnosis ?? this.repairDiagnosis,
     obs: obs ?? this.obs,
     statusName: statusName ?? this.statusName,
+    done: done ?? this.done,
     parts: parts ?? this.parts,
   );
 
