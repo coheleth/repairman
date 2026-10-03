@@ -10,6 +10,7 @@ void onDatabaseCreate(Database db, int version) async {
     );
     CREATE TABLE IF NOT EXISTS ticket (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id_readable TEXT,
       status_id INTEGER REFERENCES status (id),
       start_date INT,
       start_date_readable TEXT,

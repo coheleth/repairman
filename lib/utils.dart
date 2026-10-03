@@ -40,3 +40,7 @@ DateTime unixTimeStampToDate(int timeStamp) =>
     DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
 
 int dateToUnixTimeStamp(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;
+
+String ticketIdAsString(int id) {
+  return 'OS #${id.toString().padLeft(4, '0')}';
+}

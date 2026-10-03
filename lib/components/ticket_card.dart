@@ -67,7 +67,7 @@ class TicketCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                ticket.service,
+                                ticketIdAsString(ticket.id),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodyMedium
@@ -91,8 +91,16 @@ class TicketCard extends ConsumerWidget {
                       ],
                     ),
                     Container(height: 8),
+
                     Text(
                       'Cliente: ${ticket.clientName ?? '-'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: color),
+                    ),
+                    Text(
+                      'Serviço: ${ticket.service ?? '-'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall

@@ -71,8 +71,7 @@ class TicketMenu {
               onPressed: () {
                 ref.read(ticketListProvider.notifier).delete(ticketId);
                 Navigator.of(dialogContext).pop();
-                if ((ref.read(appStateProvider).openTicket?.id ?? -1) ==
-                    ticketId) {
+                if (ref.read(appStateProvider).openTicket?.id == ticketId) {
                   navigatorKey.currentState!.popUntil((route) => route.isFirst);
                 }
               },

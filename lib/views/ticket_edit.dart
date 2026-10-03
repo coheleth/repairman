@@ -30,8 +30,8 @@ class TicketEdit extends ConsumerStatefulWidget {
 class _TicketEditState extends ConsumerState<TicketEdit> {
   Ticket initialTicket = Ticket.empty();
 
-  String service = '';
   int statusId = 1;
+  String? service = '';
   double? servicePrice;
   DateTime? startDate;
   DateTime? deliveryDate;
@@ -108,9 +108,13 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
         ref.read(appStateProvider.notifier).setEditing(finalTicket);
         ref.read(appStateProvider.notifier).setModified(modified: false);
 
+        Ticket resultTicket = await DBController().getTicketById(id);
+
         setState(() {
           parts = newParts;
           modified = false;
+          isCreating = false;
+          initialTicket = resultTicket;
         });
         MessagingController().sendSnackBar(
           SnackBar(content: const Text('Alterações Salvas')),
@@ -187,7 +191,11 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: _handleClose),
-          title: Text(service.isNotEmpty ? service : 'Ordem de Serviço'),
+          title: Text(
+            initialTicket.id > 0
+                ? ticketIdAsString(initialTicket.id)
+                : 'Nova OS',
+          ),
           actions: [
             if (modified)
               Padding(
@@ -400,7 +408,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                       service = value;
                                     });
                                   },
-                                  required: true,
                                 ),
                               ),
                               Flexible(

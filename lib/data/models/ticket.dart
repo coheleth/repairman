@@ -8,7 +8,7 @@ import 'package:repairman/data/models/part.dart';
 class Ticket {
   final int id;
   final int statusId;
-  final String service;
+  final String? service;
   final double? servicePrice;
   final DateTime? startDate;
   final DateTime? deliveryDate;
@@ -22,6 +22,7 @@ class Ticket {
   final String? repairDiagnosis;
   final String? obs;
 
+  final String? idReadable;
   final String? statusName;
   final Done done;
   final List<Part>? parts;
@@ -29,7 +30,7 @@ class Ticket {
   const Ticket({
     required this.id,
     required this.statusId,
-    required this.service,
+    this.service,
     this.servicePrice,
     this.startDate,
     this.deliveryDate,
@@ -42,6 +43,7 @@ class Ticket {
     this.repairCondition,
     this.repairDiagnosis,
     this.obs,
+    this.idReadable,
     this.statusName,
     this.parts,
     this.done = Done.inProgress,
@@ -51,6 +53,7 @@ class Ticket {
 
   factory Ticket.fromMap(Map<String, dynamic> map) => Ticket(
     id: map['id'],
+    idReadable: map['id_readable'],
     statusId: map['status_id'],
     service: map['service'],
     servicePrice: map['service_price'],
@@ -70,11 +73,16 @@ class Ticket {
     repairDiagnosis: map['repair_diagnosis'],
     obs: map['obs'],
     statusName: map['status_name'] ?? '',
-    done: map['done'] ?? Done.inProgress,
+    done: switch (map['done']) {
+      1 => Done.done,
+      2 => Done.doneAll,
+      _ => Done.inProgress,
+    },
   );
 
   Map<String, dynamic> toMap() => {
     'id': id,
+    'id_readable': ticketIdAsString(id),
     'status_id': statusId,
     'service': service,
     'service_price': servicePrice,
@@ -132,6 +140,7 @@ class Ticket {
     obs: obs ?? this.obs,
     statusName: statusName ?? this.statusName,
     done: done ?? this.done,
+    idReadable: ticketIdAsString(id ?? this.id),
     parts: parts ?? this.parts,
   );
 

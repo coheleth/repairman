@@ -93,11 +93,9 @@ class DBController {
     final db = await database;
     final res = await db.query('ticket', where: 'id = ?', whereArgs: [id]);
     var ticket = Ticket.fromMap(res.first);
-    final status = await getStatusById(ticket.statusId);
-    final statusName = status?.name ?? '';
-    final done = status?.done;
+    final statusName = (await getStatusById(ticket.statusId))?.name ?? '';
     final parts = await getPartsByTicketId(ticket.id);
-    ticket = ticket.copyWith(statusName: statusName, done: done, parts: parts);
+    ticket = ticket.copyWith(statusName: statusName, parts: parts);
     return ticket;
   }
 
@@ -146,7 +144,7 @@ class DBController {
     final db = await database;
 
     String sql = '''
-      SELECT ticket.*, status.name as status_name FROM ticket
+      SELECT ticket.*, status.name as status_name, status.done as done FROM ticket
       LEFT JOIN status ON ticket.status_id = status.id
     ''';
     List<dynamic> args = [];
@@ -184,32 +182,61 @@ class DBController {
     return list;
   }
 
-  Future<List<Ticket>> searchTickets(String query) async {
-    final db = await database;
-    final like = '%$query%';
+  Future<List<Ticket>> searchTickets(String searchQuery) async {
+    if (searchQuery.replaceAll(' ', '').isEmpty) {
+      return [];
+    }
 
-    final res = await db.query(
-      'ticket',
-      where: '''
-        service LIKE ?
-        OR client_name LIKE ?
-        OR repair_target LIKE ?
-        OR location LIKE ?
-        OR start_date_readable LIKE ?
-        OR delivery_date_readable LIKE ?
-        ''',
-      whereArgs: List.filled(6, like),
-      orderBy:
-          '''
-        service LIKE '$like' DESC,
-        repair_target LIKE '$like' DESC,
-        service LIKE '$like' DESC,
-        location LIKE '$like' DESC,
-        start_date_readable LIKE '$like' DESC,
-        delivery_date_readable LIKE '$like' DESC,
-        service DESC
-        ''',
-    );
+    final Database db = await database;
+    final List<String> params = searchQuery.split(' ');
+    final List<String> like = params.map((param) => '%$param%').toList();
+
+    String placeholders = List.generate(like.length, (_) => '(?)').join(', ');
+
+    final String sql =
+        '''
+        WITH search_pattern (pattern) AS (
+          VALUES $placeholders
+        )
+        SELECT DISTINCT t.*
+        FROM ticket t
+        JOIN search_pattern sp
+        ON t.id_readable LIKE sp.pattern
+        OR t.client_name LIKE sp.pattern
+        OR t.service LIKE sp.pattern
+        OR t.repair_target LIKE sp.pattern
+        OR t.location LIKE sp.pattern
+        OR t.start_date LIKE sp.pattern
+        OR t.delivery_date LIKE sp.pattern
+      ''';
+
+    final res = await db.rawQuery(sql, like);
+    // final like = '%$query%';
+
+    // final res = await db.query(
+    //   'ticket',
+    //   where: '''
+    //     id_readable Like ?
+    //     OR service LIKE ?
+    //     OR client_name LIKE ?
+    //     OR repair_target LIKE ?
+    //     OR location LIKE ?
+    //     OR start_date_readable LIKE ?
+    //     OR delivery_date_readable LIKE ?
+    //     ''',
+    //   whereArgs: List.filled(7, like),
+    //   orderBy:
+    //       '''
+    //     id_readable LIKE '$like' DESC,
+    //     service LIKE '$like' DESC,
+    //     repair_target LIKE '$like' DESC,
+    //     service LIKE '$like' DESC,
+    //     location LIKE '$like' DESC,
+    //     start_date_readable LIKE '$like' DESC,
+    //     delivery_date_readable LIKE '$like' DESC,
+    //     service DESC
+    //     ''',
+    // );
 
     List<Ticket> list = res.isNotEmpty
         ? res.map((ticket) => Ticket.fromMap(ticket)).toList()
@@ -221,7 +248,15 @@ class DBController {
     final db = await database;
     final map = ticket.toMap();
     map.remove('id');
-    return await db.insert('ticket', map);
+    // return await db.insert('ticket', map);
+    int id = await db.insert('ticket', map);
+    await db.update(
+      'ticket',
+      ticket.copyWith(id: id).toMap(),
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return id;
   }
 
   Future<int> updateTicket(Ticket ticket) async {
