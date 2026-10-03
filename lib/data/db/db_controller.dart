@@ -73,6 +73,20 @@ class DBController {
     return null;
   }
 
+  Future<String> getStatusName(int id) async {
+    final db = await database;
+    final res = await db.query(
+      'status',
+      columns: ['name'],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (res.isNotEmpty) {
+      return res.first['name'] as String;
+    }
+    return "";
+  }
+
   // Ticket
 
   Future<Ticket> getTicketById(int id) async {
@@ -161,6 +175,39 @@ class DBController {
     sql += 'ORDER BY $orderBy $orderDirection NULLS LAST ';
 
     final res = await db.rawQuery(sql, args);
+
+    List<Ticket> list = res.isNotEmpty
+        ? res.map((ticket) => Ticket.fromMap(ticket)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Ticket>> searchTickets(String query) async {
+    final db = await database;
+    final like = '%$query%';
+
+    final res = await db.query(
+      'ticket',
+      where: '''
+        service LIKE ?
+        OR client_name LIKE ?
+        OR repair_target LIKE ?
+        OR location LIKE ?
+        OR start_date_readable LIKE ?
+        OR delivery_date_readable LIKE ?
+        ''',
+      whereArgs: List.filled(6, like),
+      orderBy:
+          '''
+        service LIKE '$like' DESC,
+        repair_target LIKE '$like' DESC,
+        service LIKE '$like' DESC,
+        location LIKE '$like' DESC,
+        start_date_readable LIKE '$like' DESC,
+        delivery_date_readable LIKE '$like' DESC,
+        service DESC
+        ''',
+    );
 
     List<Ticket> list = res.isNotEmpty
         ? res.map((ticket) => Ticket.fromMap(ticket)).toList()

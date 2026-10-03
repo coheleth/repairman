@@ -42,6 +42,9 @@ class MyApp extends StatelessWidget {
                   builder: (context) {
                     MessagingController().on<SnackBarEvent>().listen((event) {
                       if (context.mounted) {
+                        if (event.hidePrevious) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        }
                         ScaffoldMessenger.of(context)
                             .showSnackBar(event.snackBar);
                       }

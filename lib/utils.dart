@@ -35,3 +35,8 @@ double totalPartsPrice(List<Part> parts) {
 
 String? dateAsString(DateTime? date) =>
     date != null ? DateFormat("dd/MM/yyyy").format(date) : null;
+
+DateTime unixTimeStampToDate(int timeStamp) =>
+    DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
+
+int dateToUnixTimeStamp(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;

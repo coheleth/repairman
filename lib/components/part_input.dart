@@ -124,6 +124,7 @@ class PartInput extends StatefulWidget {
 
 class _PartInputState extends State<PartInput> {
   List<Part> parts = [];
+  final padding = EdgeInsets.symmetric(horizontal: 6);
 
   Part emptyPart() => Part(
     id: -1,
@@ -142,159 +143,225 @@ class _PartInputState extends State<PartInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Materiais'),
-        Table(
-          columnWidths: {
-            0: IntrinsicColumnWidth(),
-            1: FlexColumnWidth(),
-            2: IntrinsicColumnWidth(),
-            3: IntrinsicColumnWidth(),
-            4: IntrinsicColumnWidth(),
-            5: IntrinsicColumnWidth(),
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            ...List<TableRow>.generate(
-              parts.length,
-              (index) => TableRow(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Checkbox(
-                      value: parts[index].ticked,
-                      onChanged: (value) {
-                        setState(() {
-                          parts[index] = parts[index].copyWith(ticked: value);
-                          widget.parts[index] = widget.parts[index].copyWith(
-                            ticked: value,
-                          );
-                        });
-
-                        widget.onModified?.call(parts);
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Text(parts[index].name),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Text(
-                      'R\$${priceAsString(parts[index].price, comma: true)}',
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Text('${parts[index].quantity}'),
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      final Part? newPart = await showDialog(
-                        context: context,
-                        builder: (BuildContext context) => PartEditor(
-                          ticketId: widget.ticketId,
-                          part: parts[index],
-                        ),
-                      );
-                      if (newPart != null) {
-                        setState(() {
-                          parts[index] = newPart;
-                          widget.parts[index] = newPart;
-                        });
-
-                        widget.onModified?.call(parts);
-                      }
-                    },
-
-                    icon: Icon(Icons.edit_outlined),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Part targetPart = widget.parts.firstWhere(
-                        (part) => part == parts[index],
-                        orElse: () => emptyPart(),
-                      );
-                      final int finalIndex = widget.parts.indexWhere(
-                        (part) => part == targetPart,
-                      );
-                      widget.parts[finalIndex] = targetPart.copyWith(
-                        markedForRemoval: true,
-                      );
-                      setState(() {
-                        parts.removeAt(index);
-                      });
-
-                      widget.onModified?.call(parts);
-
-                      MessagingController().sendSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Material "${targetPart.name}" Removido',
-                          ),
-                          persist: false,
-                          action: SnackBarAction(
-                            label: 'Desfazer',
-                            onPressed: () {
-                              final finalPart = targetPart.copyWith(
-                                markedForRemoval: false,
-                              );
-                              widget.parts[finalIndex] = finalPart;
-                              setState(() {
-                                parts.insert(index, finalPart);
-                              });
-
-                              widget.onModified?.call(parts);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.delete_forever_outlined),
-                  ),
-                ],
+    return Padding(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Materiais'),
+          Table(
+            columnWidths: {
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(),
+              2: IntrinsicColumnWidth(),
+              3: IntrinsicColumnWidth(),
+              4: IntrinsicColumnWidth(),
+              5: IntrinsicColumnWidth(),
+            },
+            border: TableBorder(
+              horizontalInside: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
-            TableRow(
-              children: [
-                Container(),
-                Padding(padding: EdgeInsets.all(6), child: const Text('Total')),
-                Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Text(
-                    'R\$${priceAsString(totalPartsPrice(parts)) ?? "-"}',
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              TableRow(
+                children: [
+                  Container(),
+                  TableCell(
+                    verticalAlignment:
+                        TableCellVerticalAlignment.intrinsicHeight,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Text(
+                          'Item',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                Container(),
-                Container(),
-                Container(),
-              ],
-            ),
-          ],
-        ),
-        TextButton.icon(
-          onPressed: () async {
-            final Part? newPart = await showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-                  PartEditor(ticketId: widget.ticketId, part: emptyPart()),
-            );
-            if (newPart != null) {
-              setState(() {
-                parts.add(newPart);
-                widget.parts.add(newPart);
-              });
+                  TableCell(
+                    verticalAlignment:
+                        TableCellVerticalAlignment.intrinsicHeight,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Text(
+                          'Preço',
+                          textAlign: TextAlign.right,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    verticalAlignment:
+                        TableCellVerticalAlignment.intrinsicHeight,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Text(
+                          'Qtd.',
+                          textAlign: TextAlign.right,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(),
+                  Container(),
+                ],
+              ),
+              ...List<TableRow>.generate(
+                parts.length,
+                (index) => TableRow(
+                  decoration: BoxDecoration(
+                    color: index % 2 == 1
+                        ? Theme.of(context).colorScheme.surfaceContainer
+                        : null,
+                  ),
+                  children: [
+                    Padding(
+                      padding: padding,
+                      child: Checkbox(
+                        value: parts[index].ticked,
+                        onChanged: (value) {
+                          setState(() {
+                            parts[index] = parts[index].copyWith(ticked: value);
+                            widget.parts[index] = widget.parts[index].copyWith(
+                              ticked: value,
+                            );
+                          });
 
-              widget.onModified?.call(parts);
-            }
-          },
-          icon: Icon(Icons.add),
-          label: Text('Adicionar Material/Peça'),
-        ),
-      ],
+                          widget.onModified?.call(parts);
+                        },
+                      ),
+                    ),
+                    Padding(padding: padding, child: Text(parts[index].name)),
+                    Padding(
+                      padding: padding,
+                      child: Text(
+                        'R\$${priceAsString(parts[index].price, comma: true)}',
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    Padding(
+                      padding: padding,
+                      child: Text(
+                        '${parts[index].quantity}',
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        final Part? newPart = await showDialog(
+                          context: context,
+                          builder: (BuildContext context) => PartEditor(
+                            ticketId: widget.ticketId,
+                            part: parts[index],
+                          ),
+                        );
+                        if (newPart != null) {
+                          setState(() {
+                            parts[index] = newPart;
+                            widget.parts[index] = newPart;
+                          });
+
+                          widget.onModified?.call(parts);
+                        }
+                      },
+
+                      icon: Icon(Icons.edit_outlined),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Part targetPart = widget.parts.firstWhere(
+                          (part) => Part.isEqual(part, parts[index]),
+                          orElse: () => emptyPart(),
+                        );
+                        final int finalIndex = widget.parts.indexWhere(
+                          (part) => Part.isEqual(part, targetPart),
+                        );
+                        widget.parts[finalIndex] = targetPart.copyWith(
+                          markedForRemoval: true,
+                        );
+                        setState(() {
+                          parts.removeAt(index);
+                        });
+
+                        widget.onModified?.call(parts);
+
+                        MessagingController().sendSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Material "${targetPart.name}" Removido',
+                            ),
+                            persist: false,
+                            action: SnackBarAction(
+                              label: 'Desfazer',
+                              onPressed: () {
+                                final finalPart = targetPart.copyWith(
+                                  markedForRemoval: false,
+                                );
+                                widget.parts[finalIndex] = finalPart;
+                                setState(() {
+                                  parts.insert(index, finalPart);
+                                });
+
+                                widget.onModified?.call(parts);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.delete_forever_outlined),
+                    ),
+                  ],
+                ),
+              ),
+              TableRow(
+                children: [
+                  Container(height: 36),
+                  Padding(padding: padding, child: const Text('Total')),
+                  Padding(
+                    padding: padding,
+                    child: Text(
+                      'R\$${priceAsString(totalPartsPrice(parts), comma: true) ?? "-"}',
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  Container(),
+                  Container(),
+                  Container(),
+                ],
+              ),
+            ],
+          ),
+          TextButton.icon(
+            onPressed: () async {
+              final Part? newPart = await showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    PartEditor(ticketId: widget.ticketId, part: emptyPart()),
+              );
+              if (newPart != null) {
+                setState(() {
+                  parts.add(newPart);
+                  widget.parts.add(newPart);
+                });
+
+                widget.onModified?.call(parts);
+              }
+            },
+            icon: Icon(Icons.add),
+            label: Text('Adicionar Material'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
+import 'package:repairman/utils.dart';
 import 'package:repairman/data/models/part.dart';
 
 @immutable
@@ -43,16 +44,18 @@ class Ticket {
     this.parts,
   });
 
+  factory Ticket.empty() => Ticket(id: -1, statusId: 0, service: '');
+
   factory Ticket.fromMap(Map<String, dynamic> map) => Ticket(
     id: map['id'],
     statusId: map['status_id'],
     service: map['service'],
     servicePrice: map['service_price'],
     startDate: map['start_date'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(map['start_date'] * 1000)
+        ? unixTimeStampToDate(map['start_date'])
         : null,
     deliveryDate: map['delivery_date'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(map['delivery_date'] * 1000)
+        ? unixTimeStampToDate(map['delivery_date'])
         : null,
     clientName: map['client_name'],
     clientDocument: map['client_document'],
@@ -71,12 +74,12 @@ class Ticket {
     'status_id': statusId,
     'service': service,
     'service_price': servicePrice,
-    'start_date': startDate != null
-        ? startDate!.millisecondsSinceEpoch ~/ 1000
-        : null,
+    'start_date': startDate != null ? dateToUnixTimeStamp(startDate!) : null,
+    'start_date_readable': dateAsString(startDate),
     'delivery_date': deliveryDate != null
-        ? deliveryDate!.millisecondsSinceEpoch ~/ 1000
+        ? dateToUnixTimeStamp(deliveryDate!)
         : null,
+    'delivery_date_readable': dateAsString(deliveryDate),
     'client_name': clientName,
     'client_document': clientDocument,
     'client_address': clientAddress,

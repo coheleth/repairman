@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 class SnackBarEvent {
   final SnackBar snackBar;
-  SnackBarEvent({required this.snackBar});
+  final bool hidePrevious;
+  SnackBarEvent({required this.snackBar, this.hidePrevious = true});
 }
 
 class MessagingController {
@@ -18,7 +19,9 @@ class MessagingController {
 
   Stream<T> on<T>() => _controller.stream.where((e) => e is T).cast<T>();
 
-  void sendSnackBar(SnackBar snackBar) {
-    _controller.add(SnackBarEvent(snackBar: snackBar));
+  void sendSnackBar(SnackBar snackBar, {bool hidePrevious = true}) {
+    _controller.add(
+      SnackBarEvent(snackBar: snackBar, hidePrevious: hidePrevious),
+    );
   }
 }

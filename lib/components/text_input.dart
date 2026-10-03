@@ -8,7 +8,8 @@ InputDecoration defaultDecoration(BuildContext context) => InputDecoration(
 
 class TextInput extends StatefulWidget {
   final String labelText;
-  final Function onSaved;
+  final Function(String? value)? onSaved;
+  final Function(String value)? onChanged;
   final String? initialValue;
   final int? minLines;
   final int? maxLines;
@@ -16,7 +17,8 @@ class TextInput extends StatefulWidget {
   const TextInput({
     super.key,
     required this.labelText,
-    required this.onSaved,
+    this.onSaved,
+    this.onChanged,
     this.initialValue,
     this.minLines,
     this.maxLines,
@@ -38,7 +40,8 @@ class _TextInputState extends State<TextInput> {
         initialValue: widget.initialValue,
         minLines: widget.minLines,
         maxLines: widget.maxLines,
-        onSaved: (String? value) => widget.onSaved(value),
+        onSaved: widget.onSaved,
+        onChanged: widget.onChanged,
         validator: (value) {
           if (widget.required && (value == null || value.isEmpty)) {
             return 'Campo obrigatório';

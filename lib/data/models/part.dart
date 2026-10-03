@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable
@@ -55,4 +56,7 @@ class Part {
     ticked: ticked ?? this.ticked,
     markedForRemoval: markedForRemoval ?? this.markedForRemoval,
   );
+
+  static bool isEqual(Part partA, Part partB) =>
+      (DeepCollectionEquality().equals(partA.toMap(), partB.toMap()));
 }
