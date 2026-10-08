@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:repairman/views/ticket_dashboard.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
+import 'package:repairman/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,13 +31,8 @@ class MyApp extends StatelessWidget {
             autofocus: true,
             child: MaterialApp(
               title: 'Repairman',
-              theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.cyan)),
-              darkTheme: ThemeData(
-                colorScheme: .fromSeed(
-                  seedColor: Colors.cyan,
-                  brightness: Brightness.dark,
-                ),
-              ),
+              theme: AppTheme.lightTheme,
+              // darkTheme: AppTheme.darkTheme,
               home: Scaffold(
                 body: Builder(
                   builder: (context) {

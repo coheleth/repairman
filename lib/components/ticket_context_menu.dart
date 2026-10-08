@@ -68,6 +68,9 @@ class TicketMenu {
           content: Text('Isso não pode ser desfeito!'),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
               onPressed: () {
                 ref.read(ticketListProvider.notifier).delete(ticketId);
                 Navigator.of(dialogContext).pop();
