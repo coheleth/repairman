@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/data/db/db_controller.dart';
 import 'package:repairman/data/models/ticket.dart';
@@ -9,10 +10,16 @@ import 'package:repairman/components/confirm_close.dart';
 import 'package:repairman/components/ticket_card.dart';
 import 'package:repairman/components/status_tab_list.dart';
 import 'package:repairman/components/ticket_sort_menu.dart';
+import 'package:repairman/views/settings.dart';
 
 class TicketList extends ConsumerStatefulWidget {
   final GlobalKey<NavigatorState> navigatorKey;
-  const TicketList({super.key, required this.navigatorKey});
+  final Function? onOpenSettings;
+  const TicketList({
+    super.key,
+    required this.navigatorKey,
+    this.onOpenSettings,
+  });
 
   @override
   ConsumerState<TicketList> createState() => _TicketListState();
@@ -49,6 +56,8 @@ class _TicketListState extends ConsumerState<TicketList> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
+
     ShortcutController().on<NewEvent>().listen((event) {
       if (context.mounted) _handleNew(context, ref);
     });
@@ -59,7 +68,7 @@ class _TicketListState extends ConsumerState<TicketList> {
       appBar: searching
           ? AppBar(
               title: SearchBar(
-                hintText: 'Pesquisar...',
+                hintText: locale.uiSearch,
                 constraints: const BoxConstraints(maxHeight: 40.0),
                 elevation: WidgetStateProperty.all(0),
                 leading: Icon(Icons.search),
@@ -82,7 +91,7 @@ class _TicketListState extends ConsumerState<TicketList> {
                 onPressed: () {
                   _handleNew(context, ref);
                 },
-                label: Text('Criar Ordem de Serviço'),
+                label: Text(locale.uiCreateTicket),
                 icon: Icon(Icons.add),
               ),
               actionsPadding: EdgeInsets.only(right: 16),
@@ -94,6 +103,12 @@ class _TicketListState extends ConsumerState<TicketList> {
                     });
                   },
                   icon: Icon(Icons.search_outlined),
+                ),
+                IconButton(
+                  onPressed: () {
+                    widget.onOpenSettings?.call();
+                  },
+                  icon: Icon(Icons.settings_outlined),
                 ),
               ],
             ),

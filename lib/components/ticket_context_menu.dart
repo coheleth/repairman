@@ -1,7 +1,8 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/data/db/db_controller.dart';
 import 'package:repairman/data/state/app_state.dart';
@@ -26,6 +27,8 @@ class TicketMenu {
     required BuildContext context,
     required WidgetRef ref,
   }) {
+    final locale = AppLocalizations.of(context)!;
+
     Future<bool> confirmSaveBeforeExport() async {
       if (ticketId != ref.read(appStateProvider).openTicket?.id) {
         return true;
@@ -34,11 +37,7 @@ class TicketMenu {
       await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          content: Text('''
-            Você tem alterações não salvas.
-            É necessário salvar antes de continuar.
-            Gostaria de salvar agora?
-            '''),
+          content: Text(locale.uiConfirmSaveLabel),
           actions: [
             TextButton(
               onPressed: () {
@@ -46,13 +45,13 @@ class TicketMenu {
                 Navigator.of(context).pop();
                 confirmed = true;
               },
-              child: Text('Salvar'),
+              child: Text(locale.uiConfirmSaveActionConfirm),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancelar'),
+              child: Text(locale.uiConfirmSaveActionCancel),
             ),
           ],
         ),
@@ -64,8 +63,8 @@ class TicketMenu {
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text('Excluir Ordem de Serviço?'),
-          content: Text('Isso não pode ser desfeito!'),
+          title: Text(locale.uiConfirmDeleteLabel),
+          content: Text(locale.uiConfirmDeleteSubLabel),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
@@ -75,17 +74,18 @@ class TicketMenu {
                 ref.read(ticketListProvider.notifier).delete(ticketId);
                 Navigator.of(dialogContext).pop();
                 if (ref.read(appStateProvider).openTicket?.id == ticketId) {
+                  ref.read(appStateProvider.notifier).setIdle();
                   navigatorKey.currentState!.popUntil((route) => route.isFirst);
                 }
               },
-              child: Text('Sim, excluir'),
+              child: Text(locale.uiConfirmDeleteActionConfirm),
             ),
             FilledButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
               autofocus: true,
-              child: Text('Não excluir'),
+              child: Text(locale.uiConfirmDeleteActionCancel),
             ),
           ],
         ),
@@ -99,8 +99,12 @@ class TicketMenu {
         }
       }
       Ticket ticket = await DBController().getTicketById(ticketId);
+      String id = ticket.id.toString().padLeft(4, "0");
       final pdfBytes = await ticketToPDF(ticket);
-      FilePicker.saveFile(fileName: 'Ordem de Serviço.pdf', bytes: pdfBytes);
+      FilePicker.saveFile(
+        fileName: '${locale.ticketExportFileName(id)}.pdf',
+        bytes: pdfBytes,
+      );
     }
 
     void handlePrint() async {
@@ -115,9 +119,18 @@ class TicketMenu {
     }
 
     return [
-      ExpressiveMenuItem(onPressed: handleExport, child: Text('Exportar PDF')),
-      ExpressiveMenuItem(onPressed: handlePrint, child: Text('Imprimir')),
-      ExpressiveMenuItem(onPressed: handleDelete, child: Text('Excluir')),
+      ExpressiveMenuItem(
+        onPressed: handleExport,
+        child: Text(locale.uiContextMenuExport),
+      ),
+      ExpressiveMenuItem(
+        onPressed: handlePrint,
+        child: Text(locale.uiContextMenuPrint),
+      ),
+      ExpressiveMenuItem(
+        onPressed: handleDelete,
+        child: Text(locale.uiContextMenuDelete),
+      ),
     ];
   }
 

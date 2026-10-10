@@ -211,32 +211,6 @@ class DBController {
       ''';
 
     final res = await db.rawQuery(sql, like);
-    // final like = '%$query%';
-
-    // final res = await db.query(
-    //   'ticket',
-    //   where: '''
-    //     id_readable Like ?
-    //     OR service LIKE ?
-    //     OR client_name LIKE ?
-    //     OR repair_target LIKE ?
-    //     OR location LIKE ?
-    //     OR start_date_readable LIKE ?
-    //     OR delivery_date_readable LIKE ?
-    //     ''',
-    //   whereArgs: List.filled(7, like),
-    //   orderBy:
-    //       '''
-    //     id_readable LIKE '$like' DESC,
-    //     service LIKE '$like' DESC,
-    //     repair_target LIKE '$like' DESC,
-    //     service LIKE '$like' DESC,
-    //     location LIKE '$like' DESC,
-    //     start_date_readable LIKE '$like' DESC,
-    //     delivery_date_readable LIKE '$like' DESC,
-    //     service DESC
-    //     ''',
-    // );
 
     List<Ticket> list = res.isNotEmpty
         ? res.map((ticket) => Ticket.fromMap(ticket)).toList()

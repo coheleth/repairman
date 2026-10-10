@@ -41,7 +41,7 @@ final class TicketListProvider
   }
 }
 
-String _$ticketListHash() => r'f808825fc7b11c6fe394635e9e7dcf643700060b';
+String _$ticketListHash() => r'507c9f17e2c931a82c4f1d90bf6c5a6327222d23';
 
 abstract class _$TicketList extends $Notifier<List<Ticket>> {
   List<Ticket> build();

@@ -8,8 +8,6 @@ import 'package:repairman/data/models/part.dart';
 class Ticket {
   final int id;
   final int statusId;
-  final String? service;
-  final double? servicePrice;
   final DateTime? startDate;
   final DateTime? deliveryDate;
   final String? clientName;
@@ -21,6 +19,8 @@ class Ticket {
   final String? repairCondition;
   final String? repairDiagnosis;
   final String? obs;
+  final String? service;
+  final double? servicePrice;
 
   final String? idReadable;
   final String? statusName;

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:repairman/views/settings.dart';
 import 'package:repairman/views/ticket_edit.dart';
 import 'package:repairman/views/ticket_list.dart';
 
@@ -8,7 +9,15 @@ class TicketDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listKey = GlobalKey();
-    final navigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final ticketList = TicketList(
+      key: listKey,
+      navigatorKey: navigatorKey,
+      onOpenSettings: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Settings()));
+      },
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -18,10 +27,8 @@ class TicketDashboard extends StatelessWidget {
               SizedBox(
                 width: 360,
                 child: Navigator(
-                  onGenerateRoute: (settings) => MaterialPageRoute(
-                    builder: (context) =>
-                        TicketList(key: listKey, navigatorKey: navigatorKey),
-                  ),
+                  onGenerateRoute: (settings) =>
+                      MaterialPageRoute(builder: (context) => ticketList),
                 ),
               ),
             Expanded(
@@ -37,26 +44,24 @@ class TicketDashboard extends StatelessWidget {
                   child: Navigator(
                     key: navigatorKey,
                     onGenerateRoute: (settings) {
+                      Widget page;
                       if (settings.name == 'open') {
-                        return MaterialPageRoute(
-                          builder: (context) =>
-                              TicketEdit(navigatorKey: navigatorKey),
+                        page = TicketEdit(navigatorKey: navigatorKey);
+                      } else {
+                        page = LayoutBuilder(
+                          builder: (context, constraints) {
+                            if (MediaQuery.of(context).size.width < 800) {
+                              return ticketList;
+                            } else {
+                              return Center(child: Text('repairman'));
+                            }
+                          },
                         );
                       }
 
-                      return MaterialPageRoute(
-                        builder: (context) => LayoutBuilder(
-                          builder: (context, constraints) {
-                            if (MediaQuery.of(context).size.width < 800) {
-                              return TicketList(
-                                key: listKey,
-                                navigatorKey: navigatorKey,
-                              );
-                            } else {
-                              return Container();
-                            }
-                          },
-                        ),
+                      return MaterialPageRoute<void>(
+                        builder: (context) => page,
+                        settings: settings,
                       );
                     },
                   ),

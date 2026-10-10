@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/data/state/app_state.dart';
 
 Future<bool> confirmClose(BuildContext context, WidgetRef ref) async {
+  final locale = AppLocalizations.of(context)!;
   if (!ref.read(appStateProvider).modified) {
     return true;
   }
@@ -11,21 +13,21 @@ Future<bool> confirmClose(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (BuildContext dialogContext) {
       return AlertDialog(
-        title: Text('Descartar alterações?'),
+        title: Text(locale.uiConfirmDiscardLabel),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(dialogContext);
               confirmed = true;
             },
-            child: Text('Sim'),
+            child: Text(locale.uiConfirmDiscardActionConfirm),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(dialogContext);
             },
             autofocus: true,
-            child: Text('Não'),
+            child: Text(locale.uiConfirmDiscardActionCancel),
           ),
         ],
       );

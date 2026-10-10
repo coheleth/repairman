@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/data/models/status.dart';
 import 'package:repairman/data/state/status_list.dart';
 import 'package:repairman/components/text_input.dart';
 
@@ -29,6 +30,7 @@ class StatusDropdown extends ConsumerWidget {
         return Padding(
           padding: EdgeInsets.all(12),
           child: DropdownButtonFormField(
+            isExpanded: true,
             initialValue: safeInitialValue,
             decoration: defaultDecoration(context)
                 .copyWith(labelText: labelText),
@@ -36,7 +38,11 @@ class StatusDropdown extends ConsumerWidget {
               statuses.length,
               (int index) => DropdownMenuItem(
                 value: statuses[index].id,
-                child: Text(statuses[index].name),
+                child: Text(
+                  Status.localisedName(statuses[index].name, context),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
             ),
 

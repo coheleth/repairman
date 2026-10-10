@@ -1,7 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/utils.dart';
@@ -54,102 +55,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
 
   final _formKey = GlobalKey<FormState>();
 
-  void _handleSave(BuildContext context) async {
-    if (canSave) {
-      canSave = false;
-      _formKey.currentState!.save();
-
-      if (_formKey.currentState!.validate()) {
-        final status = await DBController().getStatusById(statusId);
-
-        Ticket ticket = Ticket(
-          id: initialTicket.id,
-          service: service,
-          servicePrice: servicePrice,
-          statusId: statusId,
-          startDate: startDate,
-          deliveryDate: deliveryDate,
-          clientName: clientName,
-          clientDocument: clientDocument,
-          clientAddress: clientAddress,
-          clientContact: clientContact,
-          repairTarget: repairTarget,
-          repairCondition: repairCondition,
-          repairDiagnosis: repairDiagnosis,
-          statusName: status?.name ?? '',
-          done: status?.done ?? Done.inProgress,
-          parts: parts,
-        );
-
-        // final newParts = await widget.onSave?.call(finalTicket);
-        int id = ticket.id;
-
-        if (isCreating) {
-          id = await ref.read(ticketListProvider.notifier).create(ticket);
-        } else {
-          ref.read(ticketListProvider.notifier).update(ticket);
-        }
-
-        List<Part> newParts = [];
-        for (Part originalPart in ticket.parts ?? []) {
-          final part = originalPart.copyWith(ticketId: id);
-          if (part.markedForRemoval && part.id > 0) {
-            DBController().deletePartById(part.id);
-          } else if (part.id > 0) {
-            DBController().updatePart(part);
-            newParts.add(part);
-          } else {
-            final id = await DBController().createPart(part);
-            newParts.add(part.copyWith(id: id));
-          }
-        }
-
-        Ticket finalTicket = ticket.copyWith(id: id, parts: newParts);
-        ref.read(appStateProvider.notifier).setEditing(finalTicket);
-        ref.read(appStateProvider.notifier).setModified(modified: false);
-
-        Ticket resultTicket = await DBController().getTicketById(id);
-
-        setState(() {
-          parts = newParts;
-          modified = false;
-          isCreating = false;
-          initialTicket = resultTicket;
-        });
-        MessagingController().sendSnackBar(
-          SnackBar(content: const Text('Alterações Salvas')),
-        );
-      } else {
-        canSave = true;
-      }
-    }
-  }
-
-  void _handleChanged() {
-    if (!modified) {
-      setState(() {
-        canSave = true;
-        modified = true;
-      });
-      ref.read(appStateProvider.notifier).setModified();
-    }
-  }
-
-  void _handleClose() async {
-    if (context.mounted) {
-      if (!await confirmClose(context, ref)) {
-        return;
-      }
-      final navigator = Navigator.of(context);
-      ref.read(appStateProvider.notifier).setIdle();
-      if (ref.read(appStateProvider).openTicket != null) {
-        navigator.pop();
-      } else {
-        navigator.popUntil((route) => route.isFirst);
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -180,17 +85,113 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
 
   @override
   Widget build(BuildContext context) {
-    ShortcutController().on<SaveEvent>().listen((eventContext) {
-      if (context.mounted) {
-        _handleSave(context);
+    final locale = AppLocalizations.of(context)!;
+    final navigatorState = Navigator.of(context);
+
+    void handleSave() async {
+      if (canSave) {
+        canSave = false;
+        _formKey.currentState!.save();
+
+        if (_formKey.currentState!.validate()) {
+          final status = await DBController().getStatusById(statusId);
+
+          Ticket ticket = Ticket(
+            id: initialTicket.id,
+            service: service,
+            servicePrice: servicePrice,
+            statusId: statusId,
+            startDate: startDate,
+            deliveryDate: deliveryDate,
+            clientName: clientName,
+            clientDocument: clientDocument,
+            clientAddress: clientAddress,
+            clientContact: clientContact,
+            repairTarget: repairTarget,
+            repairCondition: repairCondition,
+            repairDiagnosis: repairDiagnosis,
+            statusName: status?.name ?? '',
+            done: status?.done ?? Done.inProgress,
+            parts: parts,
+          );
+
+          // final newParts = await widget.onSave?.call(finalTicket);
+          int id = ticket.id;
+
+          if (isCreating) {
+            id = await ref.read(ticketListProvider.notifier).create(ticket);
+          } else {
+            ref.read(ticketListProvider.notifier).update(ticket);
+          }
+
+          List<Part> newParts = [];
+          for (Part originalPart in ticket.parts ?? []) {
+            final part = originalPart.copyWith(ticketId: id);
+            if (part.markedForRemoval && part.id > 0) {
+              DBController().deletePartById(part.id);
+            } else if (part.id > 0) {
+              DBController().updatePart(part);
+              newParts.add(part);
+            } else {
+              final id = await DBController().createPart(part);
+              newParts.add(part.copyWith(id: id));
+            }
+          }
+
+          Ticket finalTicket = ticket.copyWith(id: id, parts: newParts);
+          ref.read(appStateProvider.notifier).setEditing(finalTicket);
+          ref.read(appStateProvider.notifier).setModified(modified: false);
+
+          Ticket resultTicket = await DBController().getTicketById(id);
+
+          setState(() {
+            parts = newParts;
+            modified = false;
+            isCreating = false;
+            initialTicket = resultTicket;
+          });
+          MessagingController().sendSnackBar(
+            SnackBar(content: Text(locale.ticketSaved)),
+          );
+        } else {
+          canSave = true;
+        }
       }
+    }
+
+    void handleChanged() {
+      if (!modified) {
+        setState(() {
+          canSave = true;
+          modified = true;
+        });
+        ref.read(appStateProvider.notifier).setModified();
+      }
+    }
+
+    void handleClose() async {
+      if (context.mounted) {
+        if (!await confirmClose(context, ref)) {
+          return;
+        }
+        ref.read(appStateProvider.notifier).setIdle();
+        if (ref.read(appStateProvider).openTicket != null) {
+          navigatorState.pop();
+        } else {
+          navigatorState.popUntil((route) => route.isFirst);
+        }
+      }
+    }
+
+    ShortcutController().on<SaveEvent>().listen((eventContext) {
+      handleSave();
     });
 
     return Focus(
       autofocus: true,
       child: Scaffold(
         appBar: AppBar(
-          leading: BackButton(onPressed: _handleClose),
+          leading: BackButton(onPressed: handleClose),
           title: Text(
             initialTicket.id > 0
                 ? ticketIdAsString(initialTicket.id)
@@ -201,11 +202,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
                 child: FilledButton.icon(
-                  onPressed: () {
-                    if (context.mounted) {
-                      _handleSave(context);
-                    }
-                  },
+                  onPressed: handleSave,
                   label: Text('Salvar'),
                   icon: Icon(Icons.save),
                 ),
@@ -241,7 +238,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 56),
                     child: Form(
-                      onChanged: _handleChanged,
+                      onChanged: handleChanged,
                       key: _formKey,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -254,7 +251,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: DatePicker(
-                                  labelText: 'Data de Entrada',
+                                  labelText: locale.ticketStartDate,
                                   initialDate: startDate,
                                   onChanged: (DateTime? value) {
                                     startDate = value;
@@ -265,7 +262,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: DatePicker(
-                                  labelText: 'Prometido Para',
+                                  labelText: locale.ticketDeliveryDate,
                                   initialDate: deliveryDate,
                                   onChanged: (DateTime? value) {
                                     deliveryDate = value;
@@ -276,7 +273,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: StatusDropdown(
-                                  labelText: 'Status',
+                                  labelText: locale.status,
                                   initialValue: statusId,
                                   onChanged: (int value) {
                                     statusId = value;
@@ -292,7 +289,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Cliente',
+                                  labelText: locale.ticketClientName,
                                   initialValue: clientName,
                                   onSaved: (String? value) {
                                     clientName = value;
@@ -303,7 +300,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'CPF/CNPJ',
+                                  labelText: locale.ticketClientDocument,
                                   initialValue: clientDocument,
                                   onSaved: (String? value) {
                                     clientDocument = value;
@@ -319,7 +316,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Endereço',
+                                  labelText: locale.ticketClientAddress,
                                   initialValue: clientAddress,
                                   maxLines: 3,
                                   onSaved: (String? value) {
@@ -331,7 +328,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Contato',
+                                  labelText: locale.ticketClientContact,
                                   initialValue: clientContact,
                                   maxLines: 3,
                                   onSaved: (String? value) {
@@ -348,7 +345,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Local',
+                                  labelText: locale.ticketLocation,
                                   initialValue: location,
                                   onSaved: (String? value) {
                                     location = value;
@@ -358,7 +355,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Objeto/Equipamento',
+                                  labelText: locale.ticketRepairTarget,
                                   initialValue: repairTarget,
                                   onSaved: (String? value) {
                                     repairTarget = value;
@@ -368,7 +365,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             ],
                           ),
                           TextInput(
-                            labelText: 'Briefing/Condições de Entrada',
+                            labelText: locale.ticketRepairCondition,
                             initialValue: repairCondition,
                             maxLines: 4,
                             onSaved: (String? value) {
@@ -376,7 +373,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             },
                           ),
                           TextInput(
-                            labelText: 'Diagnóstico',
+                            labelText: locale.ticketRepairDiagnosis,
                             initialValue: repairDiagnosis,
                             maxLines: 4,
                             onSaved: (String? value) {
@@ -384,7 +381,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             },
                           ),
                           TextInput(
-                            labelText: 'Obs.',
+                            labelText: locale.ticketObs,
                             maxLines: 4,
                             initialValue: obs,
                             onSaved: (String? value) {
@@ -401,7 +398,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: 'Serviço',
+                                  labelText: locale.ticketService,
                                   initialValue: service,
                                   onChanged: (String value) {
                                     setState(() {
@@ -413,7 +410,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: NumberInput(
-                                  labelText: 'Mão de Obra (R\$)',
+                                  labelText: locale.ticketServicePrice,
                                   initialValue: priceAsString(
                                     servicePrice,
                                     comma: true,
@@ -438,7 +435,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               setState(() {
                                 partsPrice = totalPartsPrice(parts);
                               });
-                              _handleChanged();
+                              handleChanged();
                             },
                           ),
                           Flex(
@@ -455,7 +452,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Valor Total',
+                                        locale.ticketTotal,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,

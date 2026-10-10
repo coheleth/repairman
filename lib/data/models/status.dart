@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 
 enum Done { inProgress, done, doneAll }
 
@@ -37,4 +39,17 @@ class Status {
       Done.doneAll => 2,
     },
   };
+
+  static String localisedName(String name, BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
+
+    return switch (name) {
+      'DEFAULT_STATUS_NOT_STARTED' => locale.statusNotStarted,
+      'DEFAULT_STATUS_AWAITING_MATERIALS' => locale.statusAwaitingMaterials,
+      'DEFAULT_STATUS_ONGOING' => locale.statusOngoing,
+      'DEFAULT_STATUS_FINISHED' => locale.statusFinished,
+      'DEFAULT_STATUS_DELIVERED' => locale.statusDelivered,
+      _ => name,
+    };
+  }
 }

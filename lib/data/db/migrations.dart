@@ -37,11 +37,28 @@ void onDatabaseCreate(Database db, int version) async {
       ticked INTEGER
     );
   ''');
-  await db.insert('status', {'name': 'Não Iniciado', 'sort_order': 0});
-  await db.insert('status', {'name': 'Aguardando Materiais', 'sort_order': 1});
-  await db.insert('status', {'name': 'Em Andamento', 'sort_order': 2});
-  await db.insert('status', {'name': 'Finalizado', 'sort_order': 3, 'done': 1});
-  await db.insert('status', {'name': 'Entregue', 'sort_order': 4, 'done': 2});
+  await db.insert('status', {
+    'name': 'DEFAULT_STATUS_NOT_STARTED',
+    'sort_order': 0,
+  });
+  await db.insert('status', {
+    'name': 'DEFAULT_STATUS_AWAITING_MATERIALS',
+    'sort_order': 1,
+  });
+  await db.insert('status', {
+    'name': 'DEFAULT_STATUS_ONGOING',
+    'sort_order': 2,
+  });
+  await db.insert('status', {
+    'name': 'DEFAULT_STATUS_FINISHED',
+    'sort_order': 3,
+    'done': 1,
+  });
+  await db.insert('status', {
+    'name': 'DEFAULT_STATUS_DELIVERED',
+    'sort_order': 4,
+    'done': 2,
+  });
 }
 
 void onDatabaseUpgrade(Database db, int oldVersion, int newVersion) async {}

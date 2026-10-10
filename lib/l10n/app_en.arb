@@ -1,0 +1,247 @@
+{
+  "@@locale": "en",
+  "uiCreateTicket": "Create Work Order",
+  "@uiCreateTicket": {
+    "description": "Label for create work order button."
+  },
+  "uiSearch": "Search Work Order",
+  "@uiSearch": {
+    "description": "Label for work order search bar."
+  },
+  "uiContextMenuPrint": "Print",
+  "@uiContextMenuPrint": {
+    "description": "Context menu entry"
+  },
+  "uiContextMenuExport": "Export PDF",
+  "@uiContextMenuExport": {
+    "description": "Context menu entry"
+  },
+  "uiContextMenuDelete": "Delete",
+  "@uiContextMenuDelete": {
+    "description": "Context menu entry"
+  },
+  "uiConfirmDiscardLabel": "Discard Changes to Work Order?",
+  "@uiConfirmDiscardLabel": {
+    "description": "Main label for dialogue shown when closing a work order with unsaved changes."
+  },
+  "uiConfirmDiscardActionConfirm": "Yes, Discard",
+  "@uiConfirmDiscardActionConfirm": {},
+  "uiConfirmDiscardActionCancel": "Cancel",
+  "@uiConfirmDiscardActionCancel": {},
+  "uiConfirmDeleteLabel": "Delete Work Order?",
+  "@uiConfirmDeleteLabel": {
+    "description": "Main label for work order deletion dialogue."
+  },
+  "uiConfirmDeleteSubLabel": "This cannot be undone.",
+  "@uiConfirmDeleteSubLabel": {
+    "description": "Secondary text for work order deletion dialogue."
+  },
+  "uiConfirmDeleteActionConfirm": "Yes, Delete",
+  "@uiConfirmDeleteActionConfirm": {},
+  "uiConfirmDeleteActionCancel": "Cancel",
+  "@uiConfirmDeleteActionCancel": {},
+  "uiConfirmSaveLabel": "You have unsaved changes.\nYou must save them before proceeding. \nSave now?",
+  "@uiConfirmSaveLabel": {
+    "description": "Label for confirm dialogue shown when trying to export an unsaved work order."
+  },
+  "uiConfirmSaveActionConfirm": "Save and Continue",
+  "@uiConfirmSaveActionConfirm": {},
+  "uiConfirmSaveActionCancel": "Cancel",
+  "@uiConfirmSaveActionCancel": {},
+  "status": "Status",
+  "@status": {
+    "description": "Status"
+  },
+  "statusNotStarted": "Not Started",
+  "@statusNotStarted": {
+    "description": "Project not started status."
+  },
+  "statusAwaitingMaterials": "Awaiting Materials",
+  "@statusAwaitingMaterials": {
+    "description": "Awaiting materials status."
+  },
+  "statusOngoing": "Ongoing",
+  "@statusOngoing": {
+    "description": "Project is ongoing."
+  },
+  "statusFinished": "Finished",
+  "@statusFinished": {
+    "description": "Project finished."
+  },
+  "statusDelivered": "Delivered",
+  "@statusDelivered": {
+    "description": "Project delivered."
+  },
+  "statusShowAll": "All",
+  "@statusShowAll": {
+    "description": "Show all work orders."
+  },
+  "ticket": "Work Order",
+  "@ticket": {
+    "description": "Work order."
+  },
+  "tickets": "Work Orders",
+  "@tickets": {
+    "description": "Work orders (plural)."
+  },
+  "ticketStartDate": "Entry Date",
+  "@ticketStartDate": {
+    "description": "Date of job acceptance"
+  },
+  "ticketDeliveryDate": "Delivery Date",
+  "@ticketDeliveryDate": {
+    "description": "Date of job delivery"
+  },
+  "ticketClientName": "Client",
+  "@ticketClientName": {
+    "description": "Name of the work order's client."
+  },
+  "ticketClientDocument": "Document",
+  "@ticketClientDocument": {
+    "description": "Work order's client's id document."
+  },
+  "ticketClientAddress": "Address",
+  "@ticketClientAddress": {
+    "description": "Address of the work order's client."
+  },
+  "ticketClientContact": "Contact",
+  "@ticketClientContact": {
+    "description": "Contact info for the work order's client."
+  },
+  "ticketLocation": "Location",
+  "@ticketLocation": {
+    "description": "Work order job location."
+  },
+  "ticketRepairTarget": "Object/Equipment",
+  "@ticketRepairTarget": {
+    "description": "Work order's item to be repaired."
+  },
+  "ticketRepairCondition": "Briefing/Item Conditions",
+  "@ticketRepairCondition": {
+    "description": "Work order's item's conditions at admittance."
+  },
+  "ticketRepairDiagnosis": "Diagnosis",
+  "@ticketRepairDiagnosis": {
+    "description": "Work order's item's diagnosis."
+  },
+  "ticketObs": "Obs.",
+  "@ticketObs": {
+    "description": "Observations for work order."
+  },
+  "ticketService": "Service",
+  "@ticketService": {
+    "description": "Work order's service to be conducted."
+  },
+  "ticketServicePrice": "Service Price",
+  "@ticketServicePrice": {
+    "description": "Work order's service price."
+  },
+  "ticketTotal": "Total Price",
+  "@ticketTotal": {
+    "description": "Label for a work order's total price."
+  },
+  "ticketSaved": "Changes saved.",
+  "@ticketSaved": {
+    "description": "Label for the snack bar shown when a work order is saved."
+  },
+  "ticketExportFileName": "work_order_{id}",
+  "@ticketExportFileName": {
+    "description": "Default exported pdf file name.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "12"
+      }
+    }
+  },
+  "part": "Material/Part",
+  "@part": {
+    "description": "Material/Part."
+  },
+  "parts": "Materials/Parts",
+  "@parts": {
+    "description": "Materials/Parts (plural)."
+  },
+  "partQuantity": "Qt.",
+  "@partQuantity": {
+    "description": "Quantity of a material/part."
+  },
+  "partPrice": "Price",
+  "@partPrice": {
+    "description": "Label for the price of a material/part."
+  },
+  "partAdd": "Add Part",
+  "@partAdd": {
+    "description": "Label for add part button"
+  },
+  "partAddCancel": "Cancel",
+  "@partAddCancel": {
+    "description": "Label for cancel part addition button"
+  },
+  "partTotal": "Total",
+  "@partTotal": {
+    "description": "Label for total materials/parts price."
+  },
+  "partRemoved": "Material {partName} Removed",
+  "@partRemoved": {
+    "description": "Text for part removed snackbar.",
+    "placeholders": {
+      "partName": {
+        "type": "String",
+        "example": "Audio jack"
+      }
+    }
+  },
+  "partRemovedUndo": "Undo",
+  "@partRemovedUndo": {
+    "description": "Label for part removal snack bar's undo button."
+  },
+  "sortAscending": "Ascending",
+  "@sortAscending": {
+    "description": "Label for work order sort menu. Generic ascending sort."
+  },
+  "sortDescending": "Descending",
+  "@sortDescending": {
+    "description": "Label for work order sort menu. Generic descending sort."
+  },
+  "sortAscendingText": "A to Z",
+  "@sortAscendingText": {
+    "description": "Label for work order sort menu. Ascending sort for text values."
+  },
+  "sortDescendingText": "Z to A",
+  "@sortDescendingText": {
+    "description": "Label for work order sort menu. Descending sort for text values."
+  },
+  "sortAscendingDate": "Earlier to Later",
+  "@sortAscendingDate": {
+    "description": "Label for work order sort menu. Descending sort for present/future date values."
+  },
+  "sortDescendingDate": "Later to Earlier",
+  "@sortDescendingDate": {
+    "description": "Label for work order sort menu. Descending sort for present/future date values."
+  },
+  "sortAscendingDatePast": "Older to Newer",
+  "@sortAscendingDatePast": {
+    "description": "Label for work order sort menu. Descending sort for past date values."
+  },
+  "sortDescendingDatePast": "Newer to Older",
+  "@sortDescendingDatePast": {
+    "description": "Label for work order sort menu. Descending sort for past date values."
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings menu title."
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Label for language selector."
+  },
+  "settingsCurrency": "Currency",
+  "@settingsCurrency": {
+    "description": "Label for currency selector."
+  },
+  "settingsLanguageDefault": "System Default",
+  "@settingsLanguageDefault": {
+    "description": "Default value for language selector."
+  }
+}

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/utils.dart';
 import 'package:repairman/data/db/db_controller.dart';
 import 'package:repairman/data/models/status.dart';
@@ -19,6 +20,8 @@ class TicketCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = AppLocalizations.of(context)!;
+
     final appState = ref.watch(appStateProvider);
     final bool active = (appState.openTicket?.id ?? -1) == ticket.id;
     final color = active
@@ -45,8 +48,8 @@ class TicketCard extends ConsumerWidget {
               }
               final liveTicket = await DBController().getTicketById(ticket.id);
               ref.read(appStateProvider.notifier).setEditing(liveTicket);
-              navigatorKey.currentState?.popUntil((route) => route.isFirst);
-              navigatorKey.currentState?.pushNamed('open');
+              // navigatorKey.currentState?.pop((route) => route.isFirst);
+              navigatorKey.currentState?.restorablePopAndPushNamed('open');
             },
             child: Card(
               color: active
@@ -74,7 +77,10 @@ class TicketCard extends ConsumerWidget {
                                     ?.copyWith(color: color),
                               ),
                               Text(
-                                ticket.statusName ?? '-',
+                                Status.localisedName(
+                                  ticket.statusName ?? '-',
+                                  context,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodySmall
@@ -93,28 +99,28 @@ class TicketCard extends ConsumerWidget {
                     Container(height: 8),
 
                     Text(
-                      'Cliente: ${ticket.clientName ?? '-'}',
+                      '${locale.ticketClientName}: ${ticket.clientName ?? '-'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: color),
                     ),
                     Text(
-                      'Serviço: ${ticket.service ?? '-'}',
+                      '${locale.ticketService}: ${ticket.service ?? '-'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: color),
                     ),
                     Text(
-                      "Data de Entrada: ${dateAsString(ticket.startDate) ?? '-'}",
+                      "${locale.ticketStartDate}: ${dateAsString(ticket.startDate) ?? '-'}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: color),
                     ),
                     Text(
-                      "Prometido para: ${dateAsString(ticket.deliveryDate) ?? '-'}",
+                      "${locale.ticketDeliveryDate}: ${dateAsString(ticket.deliveryDate) ?? '-'}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall

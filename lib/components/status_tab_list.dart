@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/data/models/status.dart';
 import 'package:repairman/data/state/status_list.dart';
 import 'package:repairman/data/state/ticket_sort.dart';
@@ -9,6 +10,8 @@ class StatusTabList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = AppLocalizations.of(context)!;
+
     final statusList = ref.watch(statusListProvider);
     final ticketSort = ref.watch(ticketSortProvider);
 
@@ -16,7 +19,7 @@ class StatusTabList extends ConsumerWidget {
       scrollDirection: Axis.horizontal,
       child: statusList.when(
         data: (data) {
-          final statuses = [Status(id: 0, name: 'Tudo'), ...data];
+          final statuses = [Status(id: 0, name: locale.statusShowAll), ...data];
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
@@ -27,7 +30,9 @@ class StatusTabList extends ConsumerWidget {
                   final key = GlobalKey();
                   return ChoiceChip(
                     key: key,
-                    label: Text(statuses[index].name),
+                    label: Text(
+                      Status.localisedName(statuses[index].name, context),
+                    ),
                     showCheckmark: false,
                     selected: statuses[index].id == ticketSort.status,
                     onSelected: (value) {

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/components/text_input.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/utils.dart';
@@ -21,6 +22,8 @@ class _PartEditorState extends State<PartEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
+
     if (widget.part != null) {
       part = widget.part!;
     } else {
@@ -45,7 +48,7 @@ class _PartEditorState extends State<PartEditor> {
               Padding(
                 padding: EdgeInsets.all(12),
                 child: TextInput(
-                  labelText: 'Material/Peça',
+                  labelText: locale.part,
                   onSaved: (String? value) =>
                       part = part!.copyWith(name: value ?? ""),
                   required: true,
@@ -57,7 +60,7 @@ class _PartEditorState extends State<PartEditor> {
                 children: [
                   Expanded(
                     child: NumberInput(
-                      labelText: 'Qtd.',
+                      labelText: locale.partQuantity,
                       initialValue: quantityAsString(part!.quantity) ?? "0",
                       comma: true,
                       regex: RegExp(r'^\d*\,?\d*'),
@@ -67,7 +70,7 @@ class _PartEditorState extends State<PartEditor> {
                   ),
                   Expanded(
                     child: NumberInput(
-                      labelText: 'Preço (R\$)',
+                      labelText: locale.partPrice,
                       initialValue: priceAsString(part!.price) ?? "0,00",
                       comma: true,
                       regex: RegExp(r'^\d*\,?\d{0,2}'),
@@ -85,7 +88,7 @@ class _PartEditorState extends State<PartEditor> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text('Cancelar'),
+                      child: Text(locale.partAddCancel),
                     ),
                     TextButton(
                       onPressed: () {
@@ -94,7 +97,7 @@ class _PartEditorState extends State<PartEditor> {
                           Navigator.pop(context, part);
                         }
                       },
-                      child: Text('Adicionar'),
+                      child: Text(locale.partAdd),
                     ),
                   ],
                 ),
@@ -143,12 +146,14 @@ class _PartInputState extends State<PartInput> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
+
     return Padding(
       padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Materiais'),
+          Text(locale.parts),
           Table(
             columnWidths: {
               0: IntrinsicColumnWidth(),
@@ -176,7 +181,7 @@ class _PartInputState extends State<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          'Item',
+                          locale.part,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -190,7 +195,7 @@ class _PartInputState extends State<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          'Preço',
+                          locale.partPrice,
                           textAlign: TextAlign.right,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -205,7 +210,7 @@ class _PartInputState extends State<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          'Qtd.',
+                          locale.partQuantity,
                           textAlign: TextAlign.right,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -297,12 +302,10 @@ class _PartInputState extends State<PartInput> {
 
                         MessagingController().sendSnackBar(
                           SnackBar(
-                            content: Text(
-                              'Material "${targetPart.name}" Removido',
-                            ),
+                            content: Text(locale.partRemoved(targetPart.name)),
                             persist: false,
                             action: SnackBarAction(
-                              label: 'Desfazer',
+                              label: locale.partRemovedUndo,
                               onPressed: () {
                                 final finalPart = targetPart.copyWith(
                                   markedForRemoval: false,
@@ -326,7 +329,7 @@ class _PartInputState extends State<PartInput> {
               TableRow(
                 children: [
                   Container(height: 36),
-                  Padding(padding: padding, child: const Text('Total')),
+                  Padding(padding: padding, child: Text(locale.partTotal)),
                   Padding(
                     padding: padding,
                     child: Text(
@@ -358,7 +361,7 @@ class _PartInputState extends State<PartInput> {
               }
             },
             icon: Icon(Icons.add),
-            label: Text('Adicionar Material'),
+            label: Text(locale.partAdd),
           ),
         ],
       ),
