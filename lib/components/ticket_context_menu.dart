@@ -13,14 +13,12 @@ import 'package:repairman/components/ticket_pdf.dart';
 
 class TicketMenu {
   final int ticketId;
-  final GlobalKey<NavigatorState> navigatorKey;
   final BuildContext context;
   final WidgetRef ref;
   const TicketMenu({
     required this.context,
     required this.ref,
     required this.ticketId,
-    required this.navigatorKey,
   });
 
   List<Widget> _ticketContextMenuItems({
@@ -75,7 +73,6 @@ class TicketMenu {
                 Navigator.of(dialogContext).pop();
                 if (ref.read(appStateProvider).openTicket?.id == ticketId) {
                   ref.read(appStateProvider.notifier).setIdle();
-                  navigatorKey.currentState!.popUntil((route) => route.isFirst);
                 }
               },
               child: Text(locale.uiConfirmDeleteActionConfirm),

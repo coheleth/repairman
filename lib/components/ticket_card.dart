@@ -11,12 +11,7 @@ import 'package:repairman/components/ticket_context_menu.dart';
 
 class TicketCard extends ConsumerWidget {
   final Ticket ticket;
-  final GlobalKey<NavigatorState> navigatorKey;
-  const TicketCard({
-    super.key,
-    required this.ticket,
-    required this.navigatorKey,
-  });
+  const TicketCard({super.key, required this.ticket});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,108 +24,100 @@ class TicketCard extends ConsumerWidget {
         : Theme.of(context).colorScheme.onSurface;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child:
-          TicketMenu(
-            context: context,
-            ref: ref,
-            navigatorKey: navigatorKey,
-            ticketId: ticket.id,
-          ).contextMenu(
-            onTap: () async {
-              final appState = ref.read(appStateProvider);
-              if (appState.openTicket?.id == ticket.id) {
-                return;
-              }
-              if (appState.isEditing) {
-                if (!await confirmClose(context, ref)) {
-                  return;
-                }
-              }
-              final liveTicket = await DBController().getTicketById(ticket.id);
-              ref.read(appStateProvider.notifier).setEditing(liveTicket);
-              // navigatorKey.currentState?.pop((route) => route.isFirst);
-              navigatorKey.currentState?.restorablePopAndPushNamed('open');
-            },
-            child: Card(
-              color: active
-                  ? Theme.of(context).colorScheme.secondaryContainer
-                  : null,
-              elevation: 0,
-              clipBehavior: Clip.antiAlias,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Column(
+      child: TicketMenu(context: context, ref: ref, ticketId: ticket.id).contextMenu(
+        onTap: () async {
+          final appState = ref.read(appStateProvider);
+          if (appState.openTicket?.id == ticket.id) {
+            return;
+          }
+          if (appState.isEditing) {
+            if (!await confirmClose(context, ref)) {
+              return;
+            }
+          }
+          final liveTicket = await DBController().getTicketById(ticket.id);
+          ref.read(appStateProvider.notifier).setEditing(liveTicket);
+        },
+        child: Card(
+          color: active
+              ? Theme.of(context).colorScheme.secondaryContainer
+              : null,
+          elevation: 0,
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ticketIdAsString(ticket.id),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: color),
-                              ),
-                              Text(
-                                Status.localisedName(
-                                  ticket.statusName ?? '-',
-                                  context,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: color),
-                              ),
-                            ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ticketIdAsString(ticket.id),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: color),
                           ),
-                        ),
-                        Icon(switch (ticket.done) {
-                          Done.inProgress => null,
-                          Done.done => Icons.done,
-                          Done.doneAll => Icons.done_all,
-                        }),
-                      ],
+                          Text(
+                            Status.localisedName(
+                              ticket.statusName ?? '-',
+                              context,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: color),
+                          ),
+                        ],
+                      ),
                     ),
-                    Container(height: 8),
-
-                    Text(
-                      '${locale.ticketClientName}: ${ticket.clientName ?? '-'}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: color),
-                    ),
-                    Text(
-                      '${locale.ticketService}: ${ticket.service ?? '-'}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: color),
-                    ),
-                    Text(
-                      "${locale.ticketStartDate}: ${dateAsString(ticket.startDate) ?? '-'}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: color),
-                    ),
-                    Text(
-                      "${locale.ticketDeliveryDate}: ${dateAsString(ticket.deliveryDate) ?? '-'}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall
-                          ?.copyWith(color: color),
-                    ),
+                    Icon(switch (ticket.done) {
+                      Done.inProgress => null,
+                      Done.done => Icons.done,
+                      Done.doneAll => Icons.done_all,
+                    }),
                   ],
                 ),
-              ),
+                Container(height: 8),
+
+                Text(
+                  '${locale.ticketClientName}: ${ticket.clientName ?? '-'}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: color),
+                ),
+                Text(
+                  '${locale.ticketService}: ${ticket.service ?? '-'}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: color),
+                ),
+                Text(
+                  "${locale.ticketStartDate}: ${dateAsString(ticket.startDate) ?? '-'}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: color),
+                ),
+                Text(
+                  "${locale.ticketDeliveryDate}: ${dateAsString(ticket.deliveryDate) ?? '-'}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: color),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
     );
   }
 }

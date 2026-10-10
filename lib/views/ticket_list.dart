@@ -13,13 +13,8 @@ import 'package:repairman/components/ticket_sort_menu.dart';
 import 'package:repairman/views/settings.dart';
 
 class TicketList extends ConsumerStatefulWidget {
-  final GlobalKey<NavigatorState> navigatorKey;
   final Function? onOpenSettings;
-  const TicketList({
-    super.key,
-    required this.navigatorKey,
-    this.onOpenSettings,
-  });
+  const TicketList({super.key, this.onOpenSettings});
 
   @override
   ConsumerState<TicketList> createState() => _TicketListState();
@@ -44,8 +39,6 @@ class _TicketListState extends ConsumerState<TicketList> {
         }
       }
       ref.read(appStateProvider.notifier).setCreating();
-      widget.navigatorKey.currentState!.popUntil((route) => route.isFirst);
-      widget.navigatorKey.currentState!.pushNamed('open');
     }
   }
 
@@ -131,10 +124,8 @@ class _TicketListState extends ConsumerState<TicketList> {
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: ticketList.length,
-                      itemBuilder: (context, index) => TicketCard(
-                        ticket: ticketList[index],
-                        navigatorKey: widget.navigatorKey,
-                      ),
+                      itemBuilder: (context, index) =>
+                          TicketCard(ticket: ticketList[index]),
                     ),
                   ),
                 ],
@@ -143,10 +134,8 @@ class _TicketListState extends ConsumerState<TicketList> {
           ),
           ListView.builder(
             itemCount: searchList.length,
-            itemBuilder: (context, index) => TicketCard(
-              ticket: searchList[index],
-              navigatorKey: widget.navigatorKey,
-            ),
+            itemBuilder: (context, index) =>
+                TicketCard(ticket: searchList[index]),
           ),
         ],
       ),

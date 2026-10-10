@@ -21,8 +21,7 @@ import 'package:repairman/components/part_input.dart';
 import 'package:repairman/components/status_dropdown.dart';
 
 class TicketEdit extends ConsumerStatefulWidget {
-  final GlobalKey<NavigatorState> navigatorKey;
-  const TicketEdit({super.key, required this.navigatorKey});
+  const TicketEdit({super.key});
 
   @override
   ConsumerState<TicketEdit> createState() => _TicketEditState();
@@ -115,7 +114,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
             parts: parts,
           );
 
-          // final newParts = await widget.onSave?.call(finalTicket);
           int id = ticket.id;
 
           if (isCreating) {
@@ -215,7 +213,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                   context: context,
                   ref: ref,
                   ticketId: initialTicket.id,
-                  navigatorKey: widget.navigatorKey,
+                  // navigatorKey: widget.navigatorKey,
                 ).moreMenu(),
               ),
           ],
