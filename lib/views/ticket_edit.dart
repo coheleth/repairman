@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/data/state/settings_state.dart';
 import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
@@ -86,6 +87,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     final navigatorState = Navigator.of(context);
+    final usesComma = localeUsesComma(Localizations.localeOf(context));
 
     void handleSave() async {
       if (canSave) {
@@ -137,8 +139,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
           }
 
           Ticket finalTicket = ticket.copyWith(id: id, parts: newParts);
-          ref.read(appStateProvider.notifier).setEditing(finalTicket);
-          ref.read(appStateProvider.notifier).setModified(modified: false);
 
           Ticket resultTicket = await DBController().getTicketById(id);
 
@@ -151,6 +151,9 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
           MessagingController().sendSnackBar(
             SnackBar(content: Text(locale.ticketSaved)),
           );
+
+          ref.read(appStateProvider.notifier).setEditing(finalTicket);
+          ref.read(appStateProvider.notifier).setModified(modified: false);
         } else {
           canSave = true;
         }
@@ -408,13 +411,18 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: NumberInput(
-                                  labelText: locale.ticketServicePrice,
+                                  labelText:
+                                      "${locale.ticketServicePrice} (${ref.read(settingsStateProvider).currencyString(null)})",
                                   initialValue: priceAsString(
                                     servicePrice,
-                                    comma: true,
+                                    comma: usesComma,
                                   ),
-                                  comma: true,
-                                  regex: RegExp(r'^\d*\,?\d{0,2}'),
+                                  comma: localeUsesComma(
+                                    Localizations.localeOf(context),
+                                  ),
+                                  regex: usesComma
+                                      ? RegExp(r'^\d*\,?\d{0,2}')
+                                      : RegExp(r'^\d*\.?\d{0,2}'),
                                   onChanged: (value) {
                                     setState(() {
                                       servicePrice = value;
@@ -456,7 +464,15 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                             .bodySmall,
                                       ),
                                       Text(
-                                        'R\$${priceAsString((servicePrice ?? 0) + partsPrice, comma: true)}',
+                                        ref
+                                            .read(settingsStateProvider)
+                                            .currencyString(
+                                              priceAsString(
+                                                (servicePrice ?? 0) +
+                                                    partsPrice,
+                                                comma: usesComma,
+                                              ),
+                                            ),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyLarge,

@@ -16,6 +16,13 @@ class SettingsStateObject {
 
   SettingsStateObject withLocale(Locale? locale) =>
       SettingsStateObject(currency: currency, locale: locale);
+
+  String currencyString(String? value) => switch (currency) {
+    Currency.usd => "\$${value ?? ''}",
+    Currency.brl => "R\$${value ?? ''}",
+    Currency.gbp => "£${value ?? ''}",
+    Currency.eur => "${value ?? ''}€",
+  };
 }
 
 @Riverpod(keepAlive: true)

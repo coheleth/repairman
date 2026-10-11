@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:repairman/data/state/settings_state.dart';
 import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/components/text_input.dart';
 import 'package:repairman/messaging.dart';
@@ -23,6 +25,7 @@ class _PartEditorState extends State<PartEditor> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
+    final usesComma = localeUsesComma(Localizations.localeOf(context));
 
     if (widget.part != null) {
       part = widget.part!;
@@ -37,16 +40,16 @@ class _PartEditorState extends State<PartEditor> {
       );
     }
     return Dialog(
-      constraints: BoxConstraints(maxWidth: 300),
       child: Padding(
         padding: EdgeInsets.all(12),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: EdgeInsets.all(12),
+              SizedBox(
+                width: 400,
                 child: TextInput(
                   labelText: locale.part,
                   onSaved: (String? value) =>
@@ -55,34 +58,48 @@ class _PartEditorState extends State<PartEditor> {
                   initialValue: part!.name,
                 ),
               ),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: NumberInput(
-                      labelText: locale.partQuantity,
-                      initialValue: quantityAsString(part!.quantity) ?? "0",
-                      comma: true,
-                      regex: RegExp(r'^\d*\,?\d*'),
-                      onSaved: (value) =>
-                          part = part!.copyWith(quantity: value),
+              SizedBox(
+                width: 400,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: NumberInput(
+                        labelText: locale.partQuantity,
+                        initialValue:
+                            quantityAsString(
+                              part!.quantity,
+                              comma: usesComma,
+                            ) ??
+                            "0",
+                        comma: usesComma,
+                        regex: usesComma
+                            ? RegExp(r'^\d*\,?\d*')
+                            : RegExp(r'^\d*\.?\d*'),
+                        onSaved: (value) =>
+                            part = part!.copyWith(quantity: value),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: NumberInput(
-                      labelText: locale.partPrice,
-                      initialValue: priceAsString(part!.price) ?? "0,00",
-                      comma: true,
-                      regex: RegExp(r'^\d*\,?\d{0,2}'),
-                      onSaved: (value) => part = part!.copyWith(price: value),
+                    Expanded(
+                      child: NumberInput(
+                        labelText: locale.partPrice,
+                        initialValue:
+                            priceAsString(part!.price, comma: usesComma) ??
+                            "0,00",
+                        comma: usesComma,
+                        regex: usesComma
+                            ? RegExp(r'^\d*\,?\d{0,2}')
+                            : RegExp(r'^\d*\.?\d{0,2}'),
+                        onSaved: (value) => part = part!.copyWith(price: value),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Padding(
                 padding: EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     TextButton(
                       onPressed: () {
@@ -110,7 +127,7 @@ class _PartEditorState extends State<PartEditor> {
   }
 }
 
-class PartInput extends StatefulWidget {
+class PartInput extends ConsumerStatefulWidget {
   final int ticketId;
   final List<Part> parts;
   final Function(List<Part> parts)? onModified;
@@ -122,10 +139,10 @@ class PartInput extends StatefulWidget {
   });
 
   @override
-  State<PartInput> createState() => _PartInputState();
+  ConsumerState<PartInput> createState() => _PartInputState();
 }
 
-class _PartInputState extends State<PartInput> {
+class _PartInputState extends ConsumerState<PartInput> {
   List<Part> parts = [];
   final padding = EdgeInsets.symmetric(horizontal: 6);
 
@@ -147,6 +164,7 @@ class _PartInputState extends State<PartInput> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
+    final usesComma = localeUsesComma(Localizations.localeOf(context));
 
     return Padding(
       padding: EdgeInsets.all(12),
@@ -250,7 +268,14 @@ class _PartInputState extends State<PartInput> {
                     Padding(
                       padding: padding,
                       child: Text(
-                        'R\$${priceAsString(parts[index].price, comma: true)}',
+                        ref
+                            .read(settingsStateProvider)
+                            .currencyString(
+                              priceAsString(
+                                parts[index].price,
+                                comma: usesComma,
+                              ),
+                            ),
                         textAlign: TextAlign.right,
                       ),
                     ),
@@ -333,7 +358,14 @@ class _PartInputState extends State<PartInput> {
                   Padding(
                     padding: padding,
                     child: Text(
-                      'R\$${priceAsString(totalPartsPrice(parts), comma: true) ?? "-"}',
+                      ref
+                          .read(settingsStateProvider)
+                          .currencyString(
+                            priceAsString(
+                              totalPartsPrice(parts),
+                              comma: usesComma,
+                            ),
+                          ),
                       textAlign: TextAlign.right,
                     ),
                   ),

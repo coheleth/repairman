@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:repairman/data/models/part.dart';
 
 String? priceAsString(double? price, {bool comma = false}) {
@@ -44,3 +45,9 @@ int dateToUnixTimeStamp(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;
 String ticketIdAsString(int id) {
   return '#${id.toString().padLeft(4, '0')}';
 }
+
+bool localeUsesComma(Locale locale) => switch (locale.languageCode) {
+  'en' => false,
+  'pt' => true,
+  _ => true,
+};
