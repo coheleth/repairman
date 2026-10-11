@@ -1,29 +1,33 @@
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:repairman/data/models/part.dart';
+import 'package:repairman/data/state/settings_state.dart';
 
-String? priceAsString(double? price, {bool comma = false}) {
-  if (price == null) return null;
-  String priceString = price.toStringAsFixed(2);
-  if (comma) {
-    int commaPosition = priceString.lastIndexOf('.');
-    priceString = priceString
+String quantityAsString(double quantity, Locale locale) {
+  String valueString = quantity.toString();
+  if (localeUsesComma(locale)) {
+    int commaPosition = valueString.lastIndexOf('.');
+    valueString = valueString
         .replaceAll(',', '.')
         .replaceRange(commaPosition, commaPosition + 1, ',');
   }
-  return priceString;
+  return valueString;
 }
 
-String? quantityAsString(double? quantity, {bool comma = false}) {
-  if (quantity == null) return null;
-  String quantityString = quantity.toString();
-  if (comma) {
-    int commaPosition = quantityString.lastIndexOf('.');
-    quantityString = quantityString
+String priceAsString(double value, Currency currency, Locale locale) {
+  String valueString = value.toStringAsFixed(2);
+  if (localeUsesComma(locale)) {
+    int commaPosition = valueString.lastIndexOf('.');
+    valueString = valueString
         .replaceAll(',', '.')
         .replaceRange(commaPosition, commaPosition + 1, ',');
   }
-  return quantityString;
+  return switch (currency) {
+    Currency.usd => "\$$valueString",
+    Currency.brl => "R\$$valueString",
+    Currency.gbp => "£$valueString",
+    Currency.eur => "$valueString€",
+  };
 }
 
 double totalPartsPrice(List<Part> parts) {

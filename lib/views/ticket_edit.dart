@@ -85,9 +85,11 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context)!;
     final navigatorState = Navigator.of(context);
-    final usesComma = localeUsesComma(Localizations.localeOf(context));
+    final localisation = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final currency = ref.read(settingsStateProvider).currency;
+    final usesComma = localeUsesComma(locale);
 
     void handleSave() async {
       if (canSave) {
@@ -149,7 +151,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
             initialTicket = resultTicket;
           });
           MessagingController().sendSnackBar(
-            SnackBar(content: Text(locale.ticketSaved)),
+            SnackBar(content: Text(localisation.ticketSaved)),
           );
 
           ref.read(appStateProvider.notifier).setEditing(finalTicket);
@@ -252,7 +254,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: DatePicker(
-                                  labelText: locale.ticketStartDate,
+                                  labelText: localisation.ticketStartDate,
                                   initialDate: startDate,
                                   onChanged: (DateTime? value) {
                                     startDate = value;
@@ -263,7 +265,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: DatePicker(
-                                  labelText: locale.ticketDeliveryDate,
+                                  labelText: localisation.ticketDeliveryDate,
                                   initialDate: deliveryDate,
                                   onChanged: (DateTime? value) {
                                     deliveryDate = value;
@@ -274,7 +276,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: StatusDropdown(
-                                  labelText: locale.status,
+                                  labelText: localisation.status,
                                   initialValue: statusId,
                                   onChanged: (int value) {
                                     statusId = value;
@@ -290,7 +292,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketClientName,
+                                  labelText: localisation.ticketClientName,
                                   initialValue: clientName,
                                   onSaved: (String? value) {
                                     clientName = value;
@@ -301,7 +303,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketClientDocument,
+                                  labelText: localisation.ticketClientDocument,
                                   initialValue: clientDocument,
                                   onSaved: (String? value) {
                                     clientDocument = value;
@@ -317,7 +319,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketClientAddress,
+                                  labelText: localisation.ticketClientAddress,
                                   initialValue: clientAddress,
                                   maxLines: 3,
                                   onSaved: (String? value) {
@@ -329,7 +331,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketClientContact,
+                                  labelText: localisation.ticketClientContact,
                                   initialValue: clientContact,
                                   maxLines: 3,
                                   onSaved: (String? value) {
@@ -346,7 +348,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketLocation,
+                                  labelText: localisation.ticketLocation,
                                   initialValue: location,
                                   onSaved: (String? value) {
                                     location = value;
@@ -356,7 +358,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketRepairTarget,
+                                  labelText: localisation.ticketRepairTarget,
                                   initialValue: repairTarget,
                                   onSaved: (String? value) {
                                     repairTarget = value;
@@ -366,7 +368,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             ],
                           ),
                           TextInput(
-                            labelText: locale.ticketRepairCondition,
+                            labelText: localisation.ticketRepairCondition,
                             initialValue: repairCondition,
                             maxLines: 4,
                             onSaved: (String? value) {
@@ -374,7 +376,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             },
                           ),
                           TextInput(
-                            labelText: locale.ticketRepairDiagnosis,
+                            labelText: localisation.ticketRepairDiagnosis,
                             initialValue: repairDiagnosis,
                             maxLines: 4,
                             onSaved: (String? value) {
@@ -382,7 +384,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                             },
                           ),
                           TextInput(
-                            labelText: locale.ticketObs,
+                            labelText: localisation.ticketObs,
                             maxLines: 4,
                             initialValue: obs,
                             onSaved: (String? value) {
@@ -399,7 +401,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: TextInput(
-                                  labelText: locale.ticketService,
+                                  labelText: localisation.ticketService,
                                   initialValue: service,
                                   onChanged: (String value) {
                                     setState(() {
@@ -412,10 +414,11 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                 fit: FlexFit.loose,
                                 child: NumberInput(
                                   labelText:
-                                      "${locale.ticketServicePrice} (${ref.read(settingsStateProvider).currencyString(null)})",
+                                      "${localisation.ticketServicePrice} (${ref.read(settingsStateProvider).currencyString(null)})",
                                   initialValue: priceAsString(
-                                    servicePrice,
-                                    comma: usesComma,
+                                    servicePrice ?? 0,
+                                    currency,
+                                    locale,
                                   ),
                                   comma: localeUsesComma(
                                     Localizations.localeOf(context),
@@ -458,21 +461,17 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        locale.ticketTotal,
+                                        localisation.ticketTotal,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
                                       ),
                                       Text(
-                                        ref
-                                            .read(settingsStateProvider)
-                                            .currencyString(
-                                              priceAsString(
-                                                (servicePrice ?? 0) +
-                                                    partsPrice,
-                                                comma: usesComma,
-                                              ),
-                                            ),
+                                        priceAsString(
+                                          (servicePrice ?? 0) + partsPrice,
+                                          currency,
+                                          locale,
+                                        ),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyLarge,

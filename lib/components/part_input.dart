@@ -8,24 +8,26 @@ import 'package:repairman/utils.dart';
 import 'package:repairman/data/models/part.dart';
 import 'package:repairman/components/number_input.dart';
 
-class PartEditor extends StatefulWidget {
+class PartEditor extends ConsumerStatefulWidget {
   final int ticketId;
   final Part? part;
   const PartEditor({super.key, required this.ticketId, this.part});
 
   @override
-  State<PartEditor> createState() => _PartEditorState();
+  ConsumerState<PartEditor> createState() => _PartEditorState();
 }
 
-class _PartEditorState extends State<PartEditor> {
+class _PartEditorState extends ConsumerState<PartEditor> {
   Part? part;
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context)!;
-    final usesComma = localeUsesComma(Localizations.localeOf(context));
+    final localisation = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final currency = ref.read(settingsStateProvider).currency;
+    final usesComma = localeUsesComma(locale);
 
     if (widget.part != null) {
       part = widget.part!;
@@ -51,7 +53,7 @@ class _PartEditorState extends State<PartEditor> {
               SizedBox(
                 width: 400,
                 child: TextInput(
-                  labelText: locale.part,
+                  labelText: localisation.part,
                   onSaved: (String? value) =>
                       part = part!.copyWith(name: value ?? ""),
                   required: true,
@@ -64,13 +66,8 @@ class _PartEditorState extends State<PartEditor> {
                   children: [
                     Expanded(
                       child: NumberInput(
-                        labelText: locale.partQuantity,
-                        initialValue:
-                            quantityAsString(
-                              part!.quantity,
-                              comma: usesComma,
-                            ) ??
-                            "0",
+                        labelText: localisation.partQuantity,
+                        initialValue: quantityAsString(part!.quantity, locale),
                         comma: usesComma,
                         regex: usesComma
                             ? RegExp(r'^\d*\,?\d*')
@@ -81,10 +78,12 @@ class _PartEditorState extends State<PartEditor> {
                     ),
                     Expanded(
                       child: NumberInput(
-                        labelText: locale.partPrice,
-                        initialValue:
-                            priceAsString(part!.price, comma: usesComma) ??
-                            "0,00",
+                        labelText: localisation.partPrice,
+                        initialValue: priceAsString(
+                          part!.price,
+                          currency,
+                          locale,
+                        ),
                         comma: usesComma,
                         regex: usesComma
                             ? RegExp(r'^\d*\,?\d{0,2}')
@@ -105,7 +104,7 @@ class _PartEditorState extends State<PartEditor> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(locale.partAddCancel),
+                      child: Text(localisation.partAddCancel),
                     ),
                     TextButton(
                       onPressed: () {
@@ -114,7 +113,7 @@ class _PartEditorState extends State<PartEditor> {
                           Navigator.pop(context, part);
                         }
                       },
-                      child: Text(locale.partAdd),
+                      child: Text(localisation.partAdd),
                     ),
                   ],
                 ),
@@ -163,15 +162,16 @@ class _PartInputState extends ConsumerState<PartInput> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context)!;
-    final usesComma = localeUsesComma(Localizations.localeOf(context));
+    final localisation = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final currency = ref.read(settingsStateProvider).currency;
 
     return Padding(
       padding: EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(locale.parts),
+          Text(localisation.parts),
           Table(
             columnWidths: {
               0: IntrinsicColumnWidth(),
@@ -199,7 +199,7 @@ class _PartInputState extends ConsumerState<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          locale.part,
+                          localisation.part,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -213,7 +213,7 @@ class _PartInputState extends ConsumerState<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          locale.partPrice,
+                          localisation.partPrice,
                           textAlign: TextAlign.right,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -228,7 +228,7 @@ class _PartInputState extends ConsumerState<PartInput> {
                       child: Padding(
                         padding: EdgeInsets.all(6),
                         child: Text(
-                          locale.partQuantity,
+                          localisation.partQuantity,
                           textAlign: TextAlign.right,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -268,21 +268,14 @@ class _PartInputState extends ConsumerState<PartInput> {
                     Padding(
                       padding: padding,
                       child: Text(
-                        ref
-                            .read(settingsStateProvider)
-                            .currencyString(
-                              priceAsString(
-                                parts[index].price,
-                                comma: usesComma,
-                              ),
-                            ),
+                        priceAsString(parts[index].price, currency, locale),
                         textAlign: TextAlign.right,
                       ),
                     ),
                     Padding(
                       padding: padding,
                       child: Text(
-                        '${parts[index].quantity}',
+                        quantityAsString(parts[index].quantity, locale),
                         textAlign: TextAlign.right,
                       ),
                     ),
@@ -327,10 +320,12 @@ class _PartInputState extends ConsumerState<PartInput> {
 
                         MessagingController().sendSnackBar(
                           SnackBar(
-                            content: Text(locale.partRemoved(targetPart.name)),
+                            content: Text(
+                              localisation.partRemoved(targetPart.name),
+                            ),
                             persist: false,
                             action: SnackBarAction(
-                              label: locale.partRemovedUndo,
+                              label: localisation.partRemovedUndo,
                               onPressed: () {
                                 final finalPart = targetPart.copyWith(
                                   markedForRemoval: false,
@@ -354,18 +349,14 @@ class _PartInputState extends ConsumerState<PartInput> {
               TableRow(
                 children: [
                   Container(height: 36),
-                  Padding(padding: padding, child: Text(locale.partTotal)),
+                  Padding(
+                    padding: padding,
+                    child: Text(localisation.partTotal),
+                  ),
                   Padding(
                     padding: padding,
                     child: Text(
-                      ref
-                          .read(settingsStateProvider)
-                          .currencyString(
-                            priceAsString(
-                              totalPartsPrice(parts),
-                              comma: usesComma,
-                            ),
-                          ),
+                      priceAsString(totalPartsPrice(parts), currency, locale),
                       textAlign: TextAlign.right,
                     ),
                   ),
@@ -393,7 +384,7 @@ class _PartInputState extends ConsumerState<PartInput> {
               }
             },
             icon: Icon(Icons.add),
-            label: Text(locale.partAdd),
+            label: Text(localisation.partAdd),
           ),
         ],
       ),

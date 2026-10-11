@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
+import 'package:repairman/data/state/settings_state.dart';
 import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/data/db/db_controller.dart';
@@ -25,7 +26,8 @@ class TicketMenu {
     required BuildContext context,
     required WidgetRef ref,
   }) {
-    final locale = AppLocalizations.of(context)!;
+    final localisation = AppLocalizations.of(context)!;
+    final currency = ref.read(settingsStateProvider).currency;
 
     Future<bool> confirmSaveBeforeExport() async {
       if (ticketId != ref.read(appStateProvider).openTicket?.id) {
@@ -35,7 +37,7 @@ class TicketMenu {
       await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          content: Text(locale.uiConfirmSaveLabel),
+          content: Text(localisation.uiConfirmSaveLabel),
           actions: [
             TextButton(
               onPressed: () {
@@ -43,13 +45,13 @@ class TicketMenu {
                 Navigator.of(context).pop();
                 confirmed = true;
               },
-              child: Text(locale.uiConfirmSaveActionConfirm),
+              child: Text(localisation.uiConfirmSaveActionConfirm),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(locale.uiConfirmSaveActionCancel),
+              child: Text(localisation.uiConfirmSaveActionCancel),
             ),
           ],
         ),
@@ -61,8 +63,8 @@ class TicketMenu {
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(locale.uiConfirmDeleteLabel),
-          content: Text(locale.uiConfirmDeleteSubLabel),
+          title: Text(localisation.uiConfirmDeleteLabel),
+          content: Text(localisation.uiConfirmDeleteSubLabel),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
@@ -75,14 +77,14 @@ class TicketMenu {
                   ref.read(appStateProvider.notifier).setIdle();
                 }
               },
-              child: Text(locale.uiConfirmDeleteActionConfirm),
+              child: Text(localisation.uiConfirmDeleteActionConfirm),
             ),
             FilledButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
               autofocus: true,
-              child: Text(locale.uiConfirmDeleteActionCancel),
+              child: Text(localisation.uiConfirmDeleteActionCancel),
             ),
           ],
         ),
@@ -97,9 +99,9 @@ class TicketMenu {
       }
       Ticket ticket = await DBController().getTicketById(ticketId);
       String id = ticket.id.toString().padLeft(4, "0");
-      final pdfBytes = await ticketToPDF(ticket);
+      final pdfBytes = await ticketToPDF(ticket, localisation, currency);
       FilePicker.saveFile(
-        fileName: '${locale.ticketExportFileName(id)}.pdf',
+        fileName: '${localisation.ticketExportFileName(id)}.pdf',
         bytes: pdfBytes,
       );
     }
@@ -111,22 +113,22 @@ class TicketMenu {
         }
       }
       Ticket ticket = await DBController().getTicketById(ticketId);
-      final pdfBytes = await ticketToPDF(ticket);
+      final pdfBytes = await ticketToPDF(ticket, localisation, currency);
       await Printing.layoutPdf(onLayout: (format) async => pdfBytes);
     }
 
     return [
       ExpressiveMenuItem(
         onPressed: handleExport,
-        child: Text(locale.uiContextMenuExport),
+        child: Text(localisation.uiContextMenuExport),
       ),
       ExpressiveMenuItem(
         onPressed: handlePrint,
-        child: Text(locale.uiContextMenuPrint),
+        child: Text(localisation.uiContextMenuPrint),
       ),
       ExpressiveMenuItem(
         onPressed: handleDelete,
-        child: Text(locale.uiContextMenuDelete),
+        child: Text(localisation.uiContextMenuDelete),
       ),
     ];
   }

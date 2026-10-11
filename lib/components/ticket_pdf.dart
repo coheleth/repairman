@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:repairman/data/state/settings_state.dart';
+import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/utils.dart';
 import 'package:repairman/data/models/part.dart';
 import 'package:repairman/data/models/ticket.dart';
@@ -22,7 +25,13 @@ pw.Widget textDisplay(String label, String? text) {
   );
 }
 
-List<pw.Widget> partDisplay(String label, List<Part>? parts) {
+List<pw.Widget> partDisplay(
+  String label,
+  List<Part>? parts,
+  AppLocalizations localisation,
+  Currency currency,
+  Locale locale,
+) {
   final cellPadding = pw.EdgeInsets.all(4);
   return [
     pw.Text(label, style: pw.TextStyle(fontSize: 8)),
@@ -51,15 +60,14 @@ List<pw.Widget> partDisplay(String label, List<Part>? parts) {
                     pw.Padding(
                       padding: cellPadding,
                       child: pw.Text(
-                        'R\$${priceAsString(parts[index].price, comma: true)}',
+                        priceAsString(parts[index].price, currency, locale),
                         style: pw.TextStyle(fontSize: 12),
                       ),
                     ),
                     pw.Padding(
                       padding: cellPadding,
                       child: pw.Text(
-                        quantityAsString(parts[index].quantity, comma: true) ??
-                            "-",
+                        quantityAsString(parts[index].quantity, locale),
                         style: pw.TextStyle(fontSize: 12),
                       ),
                     ),
@@ -75,14 +83,14 @@ List<pw.Widget> partDisplay(String label, List<Part>? parts) {
                   pw.Padding(
                     padding: cellPadding,
                     child: pw.Text(
-                      'Total Materiais/Peças',
+                      localisation.partTotal,
                       style: pw.TextStyle(fontSize: 12),
                     ),
                   ),
                   pw.Padding(
                     padding: cellPadding,
                     child: pw.Text(
-                      'R\$${priceAsString(totalPartsPrice(parts), comma: true)}',
+                      priceAsString(totalPartsPrice(parts), currency, locale),
                       style: pw.TextStyle(fontSize: 12),
                     ),
                   ),
@@ -96,19 +104,27 @@ List<pw.Widget> partDisplay(String label, List<Part>? parts) {
   ];
 }
 
-Future<Uint8List> ticketToPDF(Ticket ticket) async {
+Future<Uint8List> ticketToPDF(
+  Ticket ticket,
+  AppLocalizations localisation,
+  Currency currency,
+) async {
   final pdf = pw.Document();
   final totalPrice =
       (ticket.servicePrice ?? 0) + totalPartsPrice(ticket.parts ?? []);
+  final locale = Locale(localisation.localeName);
   final ticketWidget = [
     pw.Row(
       children: [
         pw.Expanded(
-          child: textDisplay('Data de Entrada', dateAsString(ticket.startDate)),
+          child: textDisplay(
+            localisation.ticketStartDate,
+            dateAsString(ticket.startDate),
+          ),
         ),
         pw.Expanded(
           child: textDisplay(
-            'Prometido Para',
+            localisation.ticketDeliveryDate,
             dateAsString(ticket.deliveryDate),
           ),
         ),
@@ -116,38 +132,67 @@ Future<Uint8List> ticketToPDF(Ticket ticket) async {
     ),
     pw.Row(
       children: [
-        pw.Expanded(child: textDisplay('Cliente', ticket.clientName)),
-        pw.Expanded(child: textDisplay('CPF/CNPJ', ticket.clientDocument)),
-      ],
-    ),
-    pw.Row(
-      children: [
-        pw.Expanded(child: textDisplay('Endereço', ticket.clientAddress)),
-        pw.Expanded(child: textDisplay('Contato', ticket.clientContact)),
-      ],
-    ),
-    if ((ticket.location ?? "").isNotEmpty)
-      textDisplay('Local', ticket.location),
-    if ((ticket.repairTarget ?? "").isNotEmpty)
-      textDisplay('Aparelho/Equipamento', ticket.repairTarget),
-    if ((ticket.repairCondition ?? "").isNotEmpty)
-      textDisplay('Condições de Entrada', ticket.repairCondition),
-    if ((ticket.repairDiagnosis ?? "").isNotEmpty)
-      textDisplay('Diagnóstico', ticket.repairDiagnosis),
-    if ((ticket.obs ?? "").isNotEmpty) textDisplay('Obs.', ticket.obs),
-    pw.Row(
-      children: [
-        pw.Expanded(child: textDisplay('Serviço', ticket.service)),
+        pw.Expanded(
+          child: textDisplay(localisation.ticketClientName, ticket.clientName),
+        ),
         pw.Expanded(
           child: textDisplay(
-            'Mão De Obra',
-            'R\$${priceAsString(ticket.servicePrice ?? 0)}',
+            localisation.ticketClientDocument,
+            ticket.clientDocument,
           ),
         ),
       ],
     ),
-    ...partDisplay('Materiais/Peças', ticket.parts),
-    textDisplay('Valor Total', 'R\$${priceAsString(totalPrice)}'),
+    pw.Row(
+      children: [
+        pw.Expanded(
+          child: textDisplay(
+            localisation.ticketClientAddress,
+            ticket.clientAddress,
+          ),
+        ),
+        pw.Expanded(
+          child: textDisplay(
+            localisation.ticketClientContact,
+            ticket.clientContact,
+          ),
+        ),
+      ],
+    ),
+    if ((ticket.location ?? "").isNotEmpty)
+      textDisplay(localisation.ticketLocation, ticket.location),
+    if ((ticket.repairTarget ?? "").isNotEmpty)
+      textDisplay(localisation.ticketRepairTarget, ticket.repairTarget),
+    if ((ticket.repairCondition ?? "").isNotEmpty)
+      textDisplay(localisation.ticketRepairCondition, ticket.repairCondition),
+    if ((ticket.repairDiagnosis ?? "").isNotEmpty)
+      textDisplay(localisation.ticketRepairDiagnosis, ticket.repairDiagnosis),
+    if ((ticket.obs ?? "").isNotEmpty)
+      textDisplay(localisation.ticketObs, ticket.obs),
+    pw.Row(
+      children: [
+        pw.Expanded(
+          child: textDisplay(localisation.ticketService, ticket.service),
+        ),
+        pw.Expanded(
+          child: textDisplay(
+            localisation.ticketServicePrice,
+            priceAsString(ticket.servicePrice ?? 0, currency, locale),
+          ),
+        ),
+      ],
+    ),
+    ...partDisplay(
+      localisation.parts,
+      ticket.parts,
+      localisation,
+      currency,
+      locale,
+    ),
+    textDisplay(
+      localisation.ticketTotal,
+      priceAsString(totalPrice, currency, locale),
+    ),
   ];
   pdf.addPage(
     pw.MultiPage(
