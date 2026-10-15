@@ -50,6 +50,7 @@ dependencies:
 
   material_ui: any
   shared_preferences: ^2.5.6
+  flutter_launcher_icons: ^0.14.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
