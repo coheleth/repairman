@@ -10,7 +10,6 @@ import 'package:repairman/components/confirm_close.dart';
 import 'package:repairman/components/ticket_card.dart';
 import 'package:repairman/components/status_tab_list.dart';
 import 'package:repairman/components/ticket_sort_menu.dart';
-import 'package:repairman/views/settings.dart';
 
 class TicketList extends ConsumerStatefulWidget {
   final Function? onOpenSettings;

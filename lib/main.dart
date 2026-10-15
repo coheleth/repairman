@@ -1,6 +1,3 @@
-import 'package:flutter_localizations/flutter_localizations.dart'
-    as flutter_localizations;
-
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:repairman/data/state/settings_state.dart';
@@ -9,18 +6,33 @@ import 'package:repairman/views/ticket_dashboard.dart';
 import 'package:repairman/messaging.dart';
 import 'package:repairman/shortcuts.dart';
 import 'package:repairman/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final container = ProviderContainer();
+  final prefs = await SharedPreferences.getInstance();
+  final settings = container.read(settingsStateProvider.notifier);
+
+  settings.setValues(
+    Currency.values[prefs.getInt('currency') ?? 0],
+    prefs.getString('locale') != null
+        ? Locale(prefs.getString('locale')!)
+        : null,
+  );
+
+  runApp(RepairmanApp(container: container));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class RepairmanApp extends StatelessWidget {
+  final ProviderContainer container;
+  const RepairmanApp({super.key, required this.container});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
+    return UncontrolledProviderScope(
+      container: container,
       child: Shortcuts(
         shortcuts: shortcuts,
         child: Actions(

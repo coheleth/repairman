@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'settings_state.g.dart';
 
@@ -11,6 +12,7 @@ class SettingsStateObject {
   final Locale? locale;
 
   const SettingsStateObject({this.currency = Currency.usd, this.locale});
+
   SettingsStateObject withCurrency(Currency currency) =>
       SettingsStateObject(currency: currency, locale: locale);
 
@@ -30,11 +32,23 @@ class SettingsState extends _$SettingsState {
   @override
   SettingsStateObject build() => SettingsStateObject();
 
-  void setCurrency(Currency currency) {
-    state = state.withCurrency(currency);
+  void setValues(Currency currency, Locale? locale) {
+    state = SettingsStateObject(currency: currency, locale: locale);
   }
 
-  void setLocale(Locale? locale) {
+  void setCurrency(Currency currency) async {
+    state = state.withCurrency(currency);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('currency', currency.index);
+  }
+
+  void setLocale(Locale? locale) async {
     state = state.withLocale(locale);
+    final prefs = await SharedPreferences.getInstance();
+    if (locale != null) {
+      prefs.setString('locale', locale.languageCode);
+    } else {
+      await prefs.remove('locale');
+    }
   }
 }
