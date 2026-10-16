@@ -76,42 +76,67 @@ class TicketCard extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List<Widget>.generate(
+                        5,
+                        (index) => Icon(
+                          (ticket.priority ?? 0) >= index
+                              ? Icons.radio_button_on
+                              : Icons.radio_button_off,
+                          size: 16.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(height: 8),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${locale.ticketClientName}: ${ticket.clientName ?? '-'}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: color),
+                          ),
+                          Text(
+                            '${locale.ticketService}: ${ticket.service ?? '-'}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: color),
+                          ),
+                          Text(
+                            "${locale.ticketStartDate}: ${dateAsString(ticket.startDate) ?? '-'}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: color),
+                          ),
+                          Text(
+                            "${locale.ticketDeliveryDate}: ${dateAsString(ticket.deliveryDate) ?? '-'}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: color),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     Icon(switch (ticket.done) {
                       Done.inProgress => null,
                       Done.done => Icons.done,
                       Done.doneAll => Icons.done_all,
                     }),
                   ],
-                ),
-                Container(height: 8),
-
-                Text(
-                  '${locale.ticketClientName}: ${ticket.clientName ?? '-'}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: color),
-                ),
-                Text(
-                  '${locale.ticketService}: ${ticket.service ?? '-'}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: color),
-                ),
-                Text(
-                  "${locale.ticketStartDate}: ${dateAsString(ticket.startDate) ?? '-'}",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: color),
-                ),
-                Text(
-                  "${locale.ticketDeliveryDate}: ${dateAsString(ticket.deliveryDate) ?? '-'}",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: color),
                 ),
               ],
             ),

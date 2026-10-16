@@ -122,6 +122,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketServicePrice => 'Service Price';
 
   @override
+  String get ticketPriority => 'Priority';
+
+  @override
   String get ticketTotal => 'Total Price';
 
   @override

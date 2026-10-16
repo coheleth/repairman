@@ -21,6 +21,7 @@ class Ticket {
   final String? obs;
   final String? service;
   final double? servicePrice;
+  final int? priority;
 
   final String? idReadable;
   final String? statusName;
@@ -30,8 +31,6 @@ class Ticket {
   const Ticket({
     required this.id,
     required this.statusId,
-    this.service,
-    this.servicePrice,
     this.startDate,
     this.deliveryDate,
     this.clientName,
@@ -43,6 +42,9 @@ class Ticket {
     this.repairCondition,
     this.repairDiagnosis,
     this.obs,
+    this.service,
+    this.servicePrice,
+    this.priority,
     this.idReadable,
     this.statusName,
     this.parts,
@@ -55,8 +57,6 @@ class Ticket {
     id: map['id'],
     idReadable: map['id_readable'],
     statusId: map['status_id'],
-    service: map['service'],
-    servicePrice: map['service_price'],
     startDate: map['start_date'] != null
         ? unixTimeStampToDate(map['start_date'])
         : null,
@@ -72,6 +72,9 @@ class Ticket {
     repairCondition: map['repair_condition'],
     repairDiagnosis: map['repair_diagnosis'],
     obs: map['obs'],
+    service: map['service'],
+    servicePrice: map['service_price'],
+    priority: map['priority'],
     statusName: map['status_name'] ?? '',
     done: switch (map['done']) {
       1 => Done.done,
@@ -84,8 +87,6 @@ class Ticket {
     'id': id,
     'id_readable': ticketIdAsString(id),
     'status_id': statusId,
-    'service': service,
-    'service_price': servicePrice,
     'start_date': startDate != null ? dateToUnixTimeStamp(startDate!) : null,
     'start_date_readable': dateAsString(startDate),
     'delivery_date': deliveryDate != null
@@ -101,13 +102,14 @@ class Ticket {
     'repair_condition': repairCondition,
     'repair_diagnosis': repairDiagnosis,
     'obs': obs,
+    'service': service,
+    'service_price': servicePrice,
+    'priority': priority,
   };
 
   Ticket copyWith({
     int? id,
     int? statusId,
-    String? service,
-    double? servicePrice,
     DateTime? startDate,
     DateTime? deliveryDate,
     String? clientName,
@@ -119,14 +121,15 @@ class Ticket {
     String? repairCondition,
     String? repairDiagnosis,
     String? obs,
+    String? service,
+    double? servicePrice,
+    int? priority,
     String? statusName,
     Done? done,
     List<Part>? parts,
   }) => Ticket(
     id: id ?? this.id,
     statusId: statusId ?? this.statusId,
-    service: service ?? this.service,
-    servicePrice: servicePrice ?? this.servicePrice,
     startDate: startDate ?? this.startDate,
     deliveryDate: deliveryDate ?? this.deliveryDate,
     clientName: clientName ?? this.clientName,
@@ -138,6 +141,9 @@ class Ticket {
     repairCondition: repairCondition ?? this.repairCondition,
     repairDiagnosis: repairDiagnosis ?? this.repairDiagnosis,
     obs: obs ?? this.obs,
+    service: service ?? this.service,
+    servicePrice: servicePrice ?? this.servicePrice,
+    priority: priority ?? this.priority,
     statusName: statusName ?? this.statusName,
     done: done ?? this.done,
     idReadable: ticketIdAsString(id ?? this.id),

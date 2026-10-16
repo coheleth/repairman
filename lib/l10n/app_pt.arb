@@ -37,6 +37,7 @@
   "ticketObs": "Obs.",
   "ticketService": "Serviço",
   "ticketServicePrice": "Mão de Obra",
+  "ticketPriority": "Prioridade",
   "ticketTotal": "Preço Total",
   "ticketSaved": "Alterações Salvas.",
   "ticketExportFileName": "ordem_de_servico_{id}",

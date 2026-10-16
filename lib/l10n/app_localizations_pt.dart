@@ -122,6 +122,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get ticketServicePrice => 'Mão de Obra';
 
   @override
+  String get ticketPriority => 'Prioridade';
+
+  @override
   String get ticketTotal => 'Preço Total';
 
   @override

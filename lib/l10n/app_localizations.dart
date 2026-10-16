@@ -320,6 +320,12 @@ abstract class AppLocalizations {
   /// **'Service Price'**
   String get ticketServicePrice;
 
+  /// Label for ticket priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get ticketPriority;
+
   /// Label for a work order's total price.
   ///
   /// In en, this message translates to:

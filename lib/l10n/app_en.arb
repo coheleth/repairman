@@ -136,6 +136,10 @@
   "@ticketServicePrice": {
     "description": "Work order's service price."
   },
+  "ticketPriority": "Priority",
+  "@ticketPriority": {
+    "description": "Label for ticket priority."
+  },
   "ticketTotal": "Total Price",
   "@ticketTotal": {
     "description": "Label for a work order's total price."

@@ -35,7 +35,7 @@ class DBController {
     String path = join(documentsDirectory.path, databaseFolder, databaseFile);
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: onDatabaseCreate,
       onUpgrade: onDatabaseUpgrade,
     );
@@ -117,6 +117,8 @@ class DBController {
         orderBy = 'LOWER(service)';
       case TicketSortMode.status:
         orderBy = 'start_date';
+      case TicketSortMode.priority:
+        orderBy = 'priority';
     }
 
     String orderDirection = 'DESC';
@@ -166,6 +168,8 @@ class DBController {
         orderBy = 'LOWER(service)';
       case TicketSortMode.status:
         orderBy = 'status.sort_order';
+      case TicketSortMode.priority:
+        orderBy = 'priority';
     }
 
     String orderDirection = 'DESC';

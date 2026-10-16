@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:repairman/components/priority_rating_input.dart';
 import 'package:repairman/data/state/settings_state.dart';
 import 'package:repairman/l10n/app_localizations.dart';
 import 'package:repairman/messaging.dart';
@@ -45,6 +46,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
   String? repairCondition;
   String? repairDiagnosis;
   String? obs;
+  int? priority;
 
   double partsPrice = 0;
   List<Part> parts = [];
@@ -79,6 +81,7 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
     servicePrice = initialTicket.servicePrice;
     parts = initialTicket.parts ?? [];
     obs = initialTicket.obs;
+    priority = initialTicket.priority;
 
     partsPrice = totalPartsPrice(parts);
   }
@@ -101,8 +104,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
 
           Ticket ticket = Ticket(
             id: initialTicket.id,
-            service: service,
-            servicePrice: servicePrice,
             statusId: statusId,
             startDate: startDate,
             deliveryDate: deliveryDate,
@@ -113,6 +114,10 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
             repairTarget: repairTarget,
             repairCondition: repairCondition,
             repairDiagnosis: repairDiagnosis,
+            obs: obs,
+            service: service,
+            servicePrice: servicePrice,
+            priority: priority,
             statusName: status?.name ?? '',
             done: status?.done ?? Done.inProgress,
             parts: parts,
@@ -250,6 +255,37 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                           Flex(
                             direction: direction,
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: StatusDropdown(
+                                  labelText: localisation.status,
+                                  initialValue: statusId,
+                                  onChanged: (int value) {
+                                    statusId = value;
+                                  },
+                                ),
+                              ),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                child: PriorityRatingInput(
+                                  label: localisation.ticketPriority,
+                                  rating: priority,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      priority = value;
+                                      modified = true;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Flex(
+                            direction: direction,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Flexible(
                                 fit: FlexFit.loose,
@@ -269,17 +305,6 @@ class _TicketEditState extends ConsumerState<TicketEdit> {
                                   initialDate: deliveryDate,
                                   onChanged: (DateTime? value) {
                                     deliveryDate = value;
-                                  },
-                                ),
-                              ),
-
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: StatusDropdown(
-                                  labelText: localisation.status,
-                                  initialValue: statusId,
-                                  onChanged: (int value) {
-                                    statusId = value;
                                   },
                                 ),
                               ),

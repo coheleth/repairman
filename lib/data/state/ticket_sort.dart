@@ -2,7 +2,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ticket_sort.g.dart';
 
-enum TicketSortMode { startDate, deliveryDate, client, service, status }
+enum TicketSortMode {
+  startDate,
+  deliveryDate,
+  client,
+  service,
+  status,
+  priority,
+}
 
 enum TicketSortDirection { ascending, descending }
 

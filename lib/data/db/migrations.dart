@@ -61,4 +61,10 @@ void onDatabaseCreate(Database db, int version) async {
   });
 }
 
-void onDatabaseUpgrade(Database db, int oldVersion, int newVersion) async {}
+void onDatabaseUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 2) {
+    await db.execute('''
+      ALTER TABLE ticket ADD COLUMN priority INTEGER;
+    ''');
+  }
+}

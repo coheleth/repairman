@@ -23,6 +23,7 @@ class TicketSortMenu extends ConsumerWidget {
       TicketSortMode.client => locale.ticketClientName,
       TicketSortMode.startDate => locale.ticketStartDate,
       TicketSortMode.deliveryDate => locale.ticketDeliveryDate,
+      TicketSortMode.priority => locale.ticketPriority,
     };
 
     final sortDirectionText = switch (sortDirection) {
@@ -106,6 +107,21 @@ class TicketSortMenu extends ConsumerWidget {
                 ? Icon(Icons.check)
                 : Icon(null),
             child: Text(locale.ticketDeliveryDate),
+          ),
+          ExpressiveMenuItem(
+            onPressed: () {
+              if (sortMode != TicketSortMode.priority) {
+                onChanged(
+                  TicketSortMode.priority,
+                  TicketSortDirection.ascending,
+                );
+              }
+            },
+            active: sortMode == TicketSortMode.priority,
+            leadingIcon: sortMode == TicketSortMode.priority
+                ? Icon(Icons.check)
+                : Icon(null),
+            child: Text(locale.ticketPriority),
           ),
           ExpressiveMenuItem(
             onPressed: () {
